@@ -2756,5 +2756,801 @@ tr:last-child td{border-bottom:none}
   })();
 </script>
 
+<!-- =========================================================
+     BOQ ESTIMATOR — Floating Button
+     ========================================================= -->
+<button class="estimator-fab" id="estimatorFloatBtn" aria-label="Open Cost Estimator">
+  <span class="estimator-fab__dot"></span>
+  <i class="fa-solid fa-calculator"></i>
+  Cost Estimator
+</button>
+
+<!-- =========================================================
+     BOQ ESTIMATOR — Modal Panel
+     ========================================================= -->
+<div class="estimator-modal" id="estimatorModal" role="dialog" aria-modal="true" aria-label="Cost Estimator">
+  <div class="estimator-modal__panel">
+    <div class="estimator-modal__header">
+      <div class="estimator-modal__header-left">
+        <div class="estimator-modal__icon"><i class="fa-solid fa-calculator"></i></div>
+        <div>
+          <div class="estimator-modal__heading">Project Cost Estimator</div>
+          <div class="estimator-modal__sub">Modern Structures · Rough Order of Magnitude</div>
+        </div>
+      </div>
+      <button class="estimator-modal__close" id="estimatorModalClose" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="estimator-modal__body">
+
+<!-- ═══════════ ESTIMATOR APP ═══════════ -->
+<style>
+  /* FAB — offset above the delivery tracker button */
+  .estimator-fab {
+    position: fixed;
+    bottom: 88px;
+    right: 28px;
+    z-index: 900;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 13px 22px;
+    background: var(--yellow);
+    color: var(--navy);
+    border-radius: 999px;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 8px 28px -6px rgba(230,168,0,0.45);
+    transition: all 0.3s var(--ease);
+  }
+  .estimator-fab:hover {
+    background: var(--navy);
+    color: #fff;
+    transform: translateY(-3px);
+    box-shadow: 0 14px 32px -8px rgba(10,37,64,0.45);
+  }
+  .estimator-fab i { font-size: 13px; }
+  .estimator-fab__dot {
+    width: 8px; height: 8px;
+    background: var(--navy);
+    border-radius: 50%;
+    flex-shrink: 0;
+    animation: fab-pulse 2s ease-in-out infinite;
+  }
+  .estimator-fab:hover .estimator-fab__dot { background: var(--yellow); }
+
+  /* Modal — slides in from left (so both panels can be open) */
+  .estimator-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 998;
+    background: rgba(6,26,48,0.6);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    display: flex;
+    align-items: stretch;
+    justify-content: flex-start;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s var(--ease);
+  }
+  .estimator-modal.is-open { opacity: 1; pointer-events: all; }
+  .estimator-modal__panel {
+    width: 100%;
+    max-width: 820px;
+    background: #F5F2EC;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(-60px);
+    transition: transform 0.4s var(--ease-out);
+    overflow: hidden;
+  }
+  .estimator-modal.is-open .estimator-modal__panel { transform: translateX(0); }
+  .estimator-modal__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 24px;
+    background: var(--yellow);
+    flex-shrink: 0;
+  }
+  .estimator-modal__header-left { display: flex; align-items: center; gap: 12px; }
+  .estimator-modal__icon {
+    width: 32px; height: 32px;
+    background: var(--navy);
+    border-radius: 6px;
+    display: grid;
+    place-items: center;
+    color: var(--yellow);
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .estimator-modal__heading {
+    font-family: var(--display);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--navy);
+    letter-spacing: -0.01em;
+  }
+  .estimator-modal__sub {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: rgba(10,37,64,0.55);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-top: 1px;
+  }
+  .estimator-modal__close {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(10,37,64,0.25);
+    background: none;
+    color: var(--navy);
+    font-size: 16px;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .estimator-modal__close:hover { background: var(--navy); color: var(--yellow); border-color: var(--navy); }
+  .estimator-modal__body { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+
+  /* ── Estimator App Styles ── */
+  .est-app *, .est-app *::before, .est-app *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  .est-app {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    background: #F5F2EC;
+    color: #1A1714;
+    padding: 1.5rem 1.5rem 3rem;
+    min-height: 100%;
+  }
+  .est-app button { font-family: 'JetBrains Mono', ui-monospace, monospace; cursor: pointer; }
+
+  /* Tabs */
+  .e-tabs { display: flex; border: 1px solid #E2DDD6; border-radius: 8px; overflow: hidden; margin-bottom: 1.75rem; }
+  .e-tab { flex: 1; padding: 9px 6px; font-size: 10px; letter-spacing: 0.05em; text-transform: uppercase; text-align: center; cursor: pointer; background: #FDFCF9; color: #6B6560; border: none; border-right: 1px solid #E2DDD6; transition: all 0.15s; }
+  .e-tab:last-child { border-right: none; }
+  .e-tab.active { background: #0a2540; color: #fff; }
+  .e-panel { display: none; }
+  .e-panel.active { display: block; }
+
+  /* Section title */
+  .e-sec { font-family: 'Fraunces', Georgia, serif; font-size: 1rem; font-weight: 300; font-style: italic; margin-bottom: 1.25rem; color: #6B6560; }
+  .e-sec strong { color: #1A1714; font-style: normal; font-weight: 600; }
+  .e-note { font-size: 10px; color: #6B6560; background: #fff7d6; border: 1px solid #f0d87a; border-radius: 5px; padding: 8px 12px; margin-bottom: 1.25rem; line-height: 1.5; }
+
+  /* Form inputs */
+  .e-fg { display: flex; flex-direction: column; gap: 4px; }
+  .e-fg label { font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: #6B6560; }
+  .e-inp { height: 34px; padding: 0 10px; font-family: 'JetBrains Mono', monospace; font-size: 12px; border: 1px solid #E2DDD6; border-radius: 5px; background: #F5F2EC; color: #1A1714; outline: none; }
+  .e-inp:focus { border-color: #0a2540; background: #fff; }
+  select.e-inp { cursor: pointer; }
+  .e-inp.full { width: 100%; }
+  .e-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 10px; }
+  .e-row .e-fg { flex: 1; min-width: 120px; }
+
+  /* Rate config grid */
+  .e-rate-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 1.5rem; }
+  .e-rate-card { background: #FDFCF9; border: 1px solid #E2DDD6; border-radius: 6px; padding: 10px 12px; }
+  .e-rate-card h4 { font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: #6B6560; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px dashed #E2DDD6; }
+  .e-rate-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+  .e-rate-row:last-child { margin-bottom: 0; }
+  .e-rate-lbl { font-size: 10px; color: #1A1714; flex: 1; }
+  .e-rate-inp { width: 90px; height: 28px; padding: 0 8px; font-family: 'JetBrains Mono', monospace; font-size: 11px; border: 1px solid #E2DDD6; border-radius: 4px; background: #F5F2EC; color: #1A1714; outline: none; text-align: right; }
+  .e-rate-inp:focus { border-color: #0a2540; background: #fff; }
+  .e-rate-unit { font-size: 9px; color: #6B6560; white-space: nowrap; }
+
+  /* Project type selector */
+  .e-type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 1.25rem; }
+  .e-type-card { background: #FDFCF9; border: 1.5px solid #E2DDD6; border-radius: 8px; padding: 12px 14px; cursor: pointer; transition: all 0.15s; }
+  .e-type-card:hover { border-color: #0a2540; }
+  .e-type-card.selected { border-color: #0a2540; background: #e8f0fb; }
+  .e-type-card .e-type-icon { font-size: 18px; margin-bottom: 6px; }
+  .e-type-card .e-type-name { font-size: 11px; font-weight: 500; color: #1A1714; }
+  .e-type-card .e-type-desc { font-size: 9px; color: #6B6560; margin-top: 2px; }
+
+  /* Scope checkboxes */
+  .e-scope-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 1.25rem; }
+  .e-scope-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; background: #FDFCF9; border: 1px solid #E2DDD6; border-radius: 6px; cursor: pointer; transition: all 0.15s; }
+  .e-scope-item:hover { border-color: #0a2540; }
+  .e-scope-item.checked { border-color: #0a2540; background: #e8f0fb; }
+  .e-scope-item input[type=checkbox] { accent-color: #0a2540; width: 14px; height: 14px; flex-shrink: 0; cursor: pointer; }
+  .e-scope-item label { font-size: 11px; color: #1A1714; cursor: pointer; flex: 1; }
+
+  /* Finish level toggle */
+  .e-finish-strip { display: flex; border: 1px solid #E2DDD6; border-radius: 6px; overflow: hidden; margin-bottom: 1.25rem; }
+  .e-finish-opt { flex: 1; padding: 8px 4px; font-size: 10px; letter-spacing: 0.04em; text-transform: uppercase; text-align: center; cursor: pointer; background: #FDFCF9; color: #6B6560; border: none; border-right: 1px solid #E2DDD6; transition: all 0.15s; }
+  .e-finish-opt:last-child { border-right: none; }
+  .e-finish-opt.active { background: #0a2540; color: #fff; }
+
+  /* Buttons */
+  .e-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 1.5rem; margin-bottom: 1rem; }
+  .e-btn { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; padding: 9px 18px; border-radius: 6px; cursor: pointer; border: 1px solid; transition: all 0.2s; }
+  .e-btn-primary { background: #0a2540; color: #fff; border-color: #0a2540; }
+  .e-btn-primary:hover { background: #ffc629; color: #0a2540; border-color: #ffc629; }
+  .e-btn-secondary { background: none; color: #6B6560; border-color: #E2DDD6; }
+  .e-btn-secondary:hover { background: #E2DDD6; color: #1A1714; }
+  .e-btn-export { background: #2A7A4F; color: #fff; border-color: #2A7A4F; }
+  .e-btn-export:hover { background: #1f5e3b; }
+
+  /* Results */
+  .e-result-hero { background: #0a2540; color: #fff; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; }
+  .e-result-hero h3 { font-family: 'Fraunces', serif; font-size: 1rem; font-weight: 300; font-style: italic; color: rgba(255,255,255,0.6); margin-bottom: 4px; }
+  .e-result-range { font-size: 1.8rem; font-weight: 500; color: #ffc629; line-height: 1; margin-bottom: 6px; }
+  .e-result-sub { font-size: 11px; color: rgba(255,255,255,0.4); }
+  .e-result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 1rem; }
+  .e-result-card { background: #FDFCF9; border: 1px solid #E2DDD6; border-radius: 6px; padding: 10px 12px; }
+  .e-result-card .rc-lbl { font-size: 9px; text-transform: uppercase; letter-spacing: 0.07em; color: #6B6560; margin-bottom: 4px; }
+  .e-result-card .rc-val { font-size: 1rem; font-weight: 500; color: #0a2540; }
+  .e-result-card .rc-sub { font-size: 10px; color: #6B6560; margin-top: 2px; }
+  .e-breakdown { background: #FDFCF9; border: 1px solid #E2DDD6; border-radius: 8px; overflow: hidden; margin-bottom: 1rem; }
+  .e-breakdown-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 14px; border-bottom: 1px solid #E2DDD6; font-size: 12px; }
+  .e-breakdown-row:last-child { border-bottom: none; }
+  .e-breakdown-row.total { font-weight: 500; background: #0a2540; color: #fff; }
+  .e-breakdown-row.total span:last-child { color: #ffc629; }
+  .e-breakdown-label { color: #1A1714; display: flex; align-items: center; gap: 6px; }
+  .e-breakdown-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .e-disclaimer { font-size: 10px; color: #6B6560; background: #fff7d6; border: 1px solid #f0d87a; border-radius: 5px; padding: 10px 12px; line-height: 1.6; margin-bottom: 1rem; }
+  .e-lead-form { background: #FDFCF9; border: 1px solid #E2DDD6; border-radius: 8px; padding: 1.25rem; }
+  .e-lead-form h4 { font-family: 'Fraunces', serif; font-size: 1rem; font-weight: 600; margin-bottom: 4px; color: #0a2540; }
+  .e-lead-form p { font-size: 11px; color: #6B6560; margin-bottom: 1rem; line-height: 1.5; }
+
+  @media (max-width: 520px) {
+    .e-rate-grid, .e-type-grid, .e-result-grid, .e-scope-grid { grid-template-columns: 1fr; }
+    .estimator-fab { bottom: 82px; right: 16px; padding: 11px 16px; font-size: 11px; }
+    .estimator-modal__panel { max-width: 100%; }
+  }
+</style>
+
+<div class="est-app">
+
+  <div class="e-tabs">
+    <button class="e-tab active" id="e-tab1" onclick="eGoTab(1)">① Configure Rates</button>
+    <button class="e-tab" id="e-tab2" onclick="eGoTab(2)">② Project Details</button>
+    <button class="e-tab" id="e-tab3" onclick="eGoTab(3)">③ Estimate</button>
+  </div>
+
+  <!-- ══ TAB 1: RATE CONFIGURATION ══ -->
+  <div class="e-panel active" id="e-panel1">
+    <div class="e-sec"><strong>Your rates</strong> — set once, used for all estimates</div>
+    <div class="e-note">Enter your per-sqft or per-unit rates below. These are saved in this session. Clients will see a range (±15%) so exact rates stay private.</div>
+
+    <div class="e-rate-grid">
+
+      <div class="e-rate-card">
+        <h4>🏗 Civil / Structure</h4>
+        <div class="e-rate-row"><span class="e-rate-lbl">RCC frame construction</span><input class="e-rate-inp" id="r-rcc" type="number" placeholder="1800" /><span class="e-rate-unit">₹/sqft</span></div>
+        <div class="e-rate-row"><span class="e-rate-lbl">Brick masonry</span><input class="e-rate-inp" id="r-brick" type="number" placeholder="180" /><span class="e-rate-unit">₹/sqft</span></div>
+        <div class="e-rate-row"><span class="e-rate-lbl">Plaster (internal)</span><input class="e-rate-inp" id="r-plaster" type="number" placeholder="60" /><span class="e-rate-unit">₹/sqft</span></div>
+        <div class="e-rate-row"><span class="e-rate-lbl">Flooring (basic)</span><input class="e-rate-inp" id="r-floor-basic" type="number" placeholder="120" /><span class="e-rate-unit">₹/sqft</span></div>
+        <div class="e-rate-row"><span class="e-rate-lbl">Flooring (premium)</span><input class="e-rate-inp" id="r-floor-prem" type="number" placeholder="280" /><span class="e-rate-unit">₹/sqft</span></div>
+      </div>
+
+      <div class="e-rate-card">
+        <h4>🪟 Doors, Windows & Façade</h4>
+        <div class="e-rate-row"><span class="e-rate-lbl">External doors (per door)</span><input class="e-rate-inp" id="r-door-ext" type="number" placeholder="18000" /><span class="e-rate-unit">₹/door</span></div>
+        <div class="e-rate-row"><span class="e-rate-lbl">Internal doors (per door)</span><input class="e-rate-inp" id="r-door-int" type="number" placeholder="8000" /><span class="e-rate-unit">₹/door</span></div>
+        <div class="e-rate-row"><span class="e-rate-lbl">Windows (per window)</span><input class="e-rate-inp" id="r-window" type="number" placeholder="6000" /><span class="e-rate-unit">₹/win</span></div>
+        <div class="e-rate-row"><span class="e-rate-lbl">Façade / external finish</span><input class="e-rate-inp" id="r-facade" type="number" placeholder="220" /><span class="e-rate-unit">₹/sqft</span></div>
+      </div>
+
+      <div class="e-rate-card">
+        <h4>⚡ MEP (per sqft of built-up)</h4>
+        <div class="e-rate-row"><span class="e-rate-lbl">Electrical</span><input class="e-rate-inp" id="r-elec" type="number" placeholder="120" /><span class="e-rate-unit">₹/sqft</span></div>
+        <div class="e-rate-row"><span class="e-rate-lbl">Plumbing & sanitary</span><input class="e-rate-inp" id="r-plumb" type="number" placeholder="90" /><span class="e-rate-unit">₹/sqft</span></div>
+        <div class="e-rate-row"><span class="e-rate-lbl">HVAC / AC points</span><input class="e-rate-inp" id="r-hvac" type="number" placeholder="60" /><span class="e-rate-unit">₹/sqft</span></div>
+      </div>
+
+      <div class="e-rate-card">
+        <h4>🛋 Interior Fitout</h4>
+        <div class="e-rate-row"><span class="e-rate-lbl">Modular kitchen (per unit)</span><input class="e-rate-inp" id="r-kitchen" type="number" placeholder="120000" /><span class="e-rate-unit">₹/kit</span></div>
+        <div class="e-rate-row"><span class="e-rate-lbl">Modular wardrobe (per unit)</span><input class="e-rate-inp" id="r-wardrobe" type="number" placeholder="35000" /><span class="e-rate-unit">₹/unit</span></div>
+        <div class="e-rate-row"><span class="e-rate-lbl">False ceiling (basic)</span><input class="e-rate-inp" id="r-ceil-basic" type="number" placeholder="75" /><span class="e-rate-unit">₹/sqft</span></div>
+        <div class="e-rate-row"><span class="e-rate-lbl">False ceiling (designer)</span><input class="e-rate-inp" id="r-ceil-des" type="number" placeholder="180" /><span class="e-rate-unit">₹/sqft</span></div>
+        <div class="e-rate-row"><span class="e-rate-lbl">Paint (2 coats)</span><input class="e-rate-inp" id="r-paint" type="number" placeholder="22" /><span class="e-rate-unit">₹/sqft</span></div>
+      </div>
+
+      <div class="e-rate-card">
+        <h4>🏠 Renovation / Demolition</h4>
+        <div class="e-rate-row"><span class="e-rate-lbl">Demolition & debris</span><input class="e-rate-inp" id="r-demo" type="number" placeholder="40" /><span class="e-rate-unit">₹/sqft</span></div>
+        <div class="e-rate-row"><span class="e-rate-lbl">Tile removal & relay</span><input class="e-rate-inp" id="r-tile-ren" type="number" placeholder="110" /><span class="e-rate-unit">₹/sqft</span></div>
+      </div>
+
+      <div class="e-rate-card">
+        <h4>📐 Land / Plot Construction</h4>
+        <div class="e-rate-row"><span class="e-rate-lbl">Foundation (per sqft plot)</span><input class="e-rate-inp" id="r-found" type="number" placeholder="250" /><span class="e-rate-unit">₹/sqft</span></div>
+        <div class="e-rate-row"><span class="e-rate-lbl">Boundary wall (per RFT)</span><input class="e-rate-inp" id="r-bwall" type="number" placeholder="1200" /><span class="e-rate-unit">₹/rft</span></div>
+        <div class="e-rate-row"><span class="e-rate-lbl">Site development / levelling</span><input class="e-rate-inp" id="r-site" type="number" placeholder="30" /><span class="e-rate-unit">₹/sqft</span></div>
+      </div>
+
+    </div>
+
+    <!-- Contingency & overhead -->
+    <div class="e-rate-card" style="margin-bottom:1.5rem">
+      <h4>📊 Overheads & Contingency</h4>
+      <div class="e-rate-row">
+        <span class="e-rate-lbl">Overhead / profit margin (%)</span>
+        <input class="e-rate-inp" id="r-overhead" type="number" placeholder="15" min="0" max="50" />
+        <span class="e-rate-unit">%</span>
+      </div>
+      <div class="e-rate-row">
+        <span class="e-rate-lbl">Contingency buffer (%)</span>
+        <input class="e-rate-inp" id="r-contingency" type="number" placeholder="10" min="0" max="30" />
+        <span class="e-rate-unit">%</span>
+      </div>
+    </div>
+
+    <div class="e-actions">
+      <button class="e-btn e-btn-primary" onclick="eSaveRates()">Save Rates & Continue →</button>
+    </div>
+  </div>
+
+  <!-- ══ TAB 2: PROJECT DETAILS ══ -->
+  <div class="e-panel" id="e-panel2">
+    <div class="e-sec"><strong>Project type</strong> — select what applies</div>
+
+    <div class="e-type-grid" id="e-type-grid">
+      <div class="e-type-card" onclick="eSelectType('residential')" id="etype-residential">
+        <div class="e-type-icon">🏠</div>
+        <div class="e-type-name">Residential</div>
+        <div class="e-type-desc">Flat, house, villa, apartment</div>
+      </div>
+      <div class="e-type-card" onclick="eSelectType('commercial')" id="etype-commercial">
+        <div class="e-type-icon">🏢</div>
+        <div class="e-type-name">Commercial</div>
+        <div class="e-type-desc">Office, shop, showroom, clinic</div>
+      </div>
+      <div class="e-type-card" onclick="eSelectType('interior')" id="etype-interior">
+        <div class="e-type-icon">🛋</div>
+        <div class="e-type-name">Interior Fitout</div>
+        <div class="e-type-desc">Interiors only, no civil work</div>
+      </div>
+      <div class="e-type-card" onclick="eSelectType('renovation')" id="etype-renovation">
+        <div class="e-type-icon">🔨</div>
+        <div class="e-type-name">Renovation / Extension</div>
+        <div class="e-type-desc">Partial or full renovation</div>
+      </div>
+      <div class="e-type-card" onclick="eSelectType('plot')" id="etype-plot">
+        <div class="e-type-icon">📐</div>
+        <div class="e-type-name">Plot + Construction</div>
+        <div class="e-type-desc">Fresh build on owned land</div>
+      </div>
+    </div>
+
+    <!-- Dimensions -->
+    <div class="e-sec" style="margin-top:1.25rem"><strong>Dimensions</strong></div>
+    <div class="e-row" style="margin-bottom:1.25rem">
+      <div class="e-fg"><label>Built-up area (sqft)</label><input class="e-inp full" id="e-bua" type="number" placeholder="1500" oninput="eUpdateLive()" /></div>
+      <div class="e-fg"><label>No. of floors</label><input class="e-inp full" id="e-floors" type="number" placeholder="1" min="1" max="20" value="1" oninput="eUpdateLive()" /></div>
+      <div class="e-fg" id="e-plot-area-fg" style="display:none"><label>Plot area (sqft)</label><input class="e-inp full" id="e-plot" type="number" placeholder="1000" oninput="eUpdateLive()" /></div>
+    </div>
+
+    <!-- Unit counts -->
+    <div class="e-sec"><strong>Units</strong> <span style="font-size:10px;font-style:normal">(leave 0 if not applicable)</span></div>
+    <div class="e-row" style="margin-bottom:1.25rem">
+      <div class="e-fg"><label>Bedrooms / Rooms</label><input class="e-inp full" id="e-beds" type="number" placeholder="3" min="0" value="0" oninput="eUpdateLive()" /></div>
+      <div class="e-fg"><label>Bathrooms</label><input class="e-inp full" id="e-baths" type="number" placeholder="2" min="0" value="0" oninput="eUpdateLive()" /></div>
+      <div class="e-fg"><label>Kitchens</label><input class="e-inp full" id="e-kitchens" type="number" placeholder="1" min="0" value="0" oninput="eUpdateLive()" /></div>
+      <div class="e-fg"><label>Wardrobes</label><input class="e-inp full" id="e-wardrobes" type="number" placeholder="2" min="0" value="0" oninput="eUpdateLive()" /></div>
+    </div>
+
+    <!-- Scope of work -->
+    <div class="e-sec"><strong>Scope of work</strong> — select all that apply</div>
+    <div class="e-scope-grid" id="e-scope-grid">
+      <div class="e-scope-item checked" onclick="eToggleScope(this)" data-scope="civil"><input type="checkbox" checked /><label>Civil / Structure</label></div>
+      <div class="e-scope-item checked" onclick="eToggleScope(this)" data-scope="mep"><input type="checkbox" checked /><label>MEP (Electrical, Plumbing, HVAC)</label></div>
+      <div class="e-scope-item checked" onclick="eToggleScope(this)" data-scope="flooring"><input type="checkbox" checked /><label>Flooring</label></div>
+      <div class="e-scope-item checked" onclick="eToggleScope(this)" data-scope="doors"><input type="checkbox" checked /><label>Doors &amp; Windows</label></div>
+      <div class="e-scope-item" onclick="eToggleScope(this)" data-scope="interior"><input type="checkbox" /><label>Interior Fitout</label></div>
+      <div class="e-scope-item" onclick="eToggleScope(this)" data-scope="facade"><input type="checkbox" /><label>Façade / External Finish</label></div>
+      <div class="e-scope-item" onclick="eToggleScope(this)" data-scope="ceiling"><input type="checkbox" /><label>False Ceiling</label></div>
+      <div class="e-scope-item" onclick="eToggleScope(this)" data-scope="paint"><input type="checkbox" checked /><label>Paint &amp; Finishing</label></div>
+      <div class="e-scope-item" onclick="eToggleScope(this)" data-scope="demolition"><input type="checkbox" /><label>Demolition / Removal</label></div>
+      <div class="e-scope-item" onclick="eToggleScope(this)" data-scope="sitework"><input type="checkbox" /><label>Site Development / Boundary</label></div>
+    </div>
+
+    <!-- Finish level -->
+    <div class="e-sec" style="margin-top:1.25rem"><strong>Finish level</strong></div>
+    <div class="e-finish-strip">
+      <button class="e-finish-opt" id="finish-basic" onclick="eSetFinish('basic')">Basic</button>
+      <button class="e-finish-opt active" id="finish-standard" onclick="eSetFinish('standard')">Standard</button>
+      <button class="e-finish-opt" id="finish-premium" onclick="eSetFinish('premium')">Premium</button>
+      <button class="e-finish-opt" id="finish-luxury" onclick="eSetFinish('luxury')">Luxury</button>
+    </div>
+
+    <!-- Client info (optional) -->
+    <div class="e-sec"><strong>Client details</strong> <span style="font-size:10px;font-style:normal">(optional, for quote header)</span></div>
+    <div class="e-row">
+      <div class="e-fg"><label>Client name</label><input class="e-inp full" id="e-client-name" type="text" placeholder="Mr. / Ms. ..." /></div>
+      <div class="e-fg"><label>Site location</label><input class="e-inp full" id="e-site-loc" type="text" placeholder="Sector 27, Noida" /></div>
+    </div>
+
+    <div class="e-actions">
+      <button class="e-btn e-btn-primary" onclick="eCalculate()">Calculate Estimate →</button>
+      <button class="e-btn e-btn-secondary" onclick="eGoTab(1)">← Edit Rates</button>
+    </div>
+  </div>
+
+  <!-- ══ TAB 3: RESULTS ══ -->
+  <div class="e-panel" id="e-panel3">
+    <div class="e-result-hero">
+      <h3 id="e-res-project-label">Project estimate</h3>
+      <div class="e-result-range" id="e-res-range">—</div>
+      <div class="e-result-sub" id="e-res-sub">—</div>
+    </div>
+
+    <div class="e-result-grid" id="e-res-grid"></div>
+
+    <div class="e-sec" style="margin-top:1rem"><strong>Cost breakdown</strong></div>
+    <div class="e-breakdown" id="e-breakdown"></div>
+
+    <div class="e-disclaimer">
+      ⚠ This is a <strong>rough order-of-magnitude estimate</strong> based on your input rates and scope. Actual costs depend on soil conditions, structural design, material selection, and site access. A detailed BOQ will be prepared after a site visit.
+    </div>
+
+    <div class="e-lead-form">
+      <h4>Want a detailed quote?</h4>
+      <p>Share this estimate with your client or send it to yourself. For a proper site-visit and BOQ, contact the team.</p>
+      <div class="e-actions" style="margin-top:0">
+        <button class="e-btn e-btn-export" onclick="eExport()">⬇ Export as HTML</button>
+        <button class="e-btn e-btn-secondary" onclick="eGoTab(2)">← Edit Details</button>
+        <button class="e-btn e-btn-secondary" onclick="eReset()">New Estimate</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- .est-app -->
+
+<script>
+(function(){
+  var E_RATES = {};
+  var E_TYPE  = 'residential';
+  var E_FINISH = 'standard';
+  var E_SCOPE = {};
+
+  // Finish multipliers
+  var FINISH_MULT = { basic: 0.78, standard: 1.0, premium: 1.28, luxury: 1.6 };
+  var FINISH_LABEL = { basic: 'Basic', standard: 'Standard', premium: 'Premium', luxury: 'Luxury' };
+
+  // Scope labels + dot colors
+  var SCOPE_META = {
+    civil:      { label: 'Civil / Structure',         color: '#1e5fbf' },
+    mep:        { label: 'MEP Services',               color: '#C8411A' },
+    flooring:   { label: 'Flooring',                   color: '#8B5E00' },
+    doors:      { label: 'Doors & Windows',            color: '#2A7A4F' },
+    interior:   { label: 'Interior Fitout',            color: '#6B3FA0' },
+    facade:     { label: 'Façade / External Finish',   color: '#0a2540' },
+    ceiling:    { label: 'False Ceiling',              color: '#A09A94' },
+    paint:      { label: 'Paint & Finishing',          color: '#D4A017' },
+    demolition: { label: 'Demolition / Removal',       color: '#8B2020' },
+    sitework:   { label: 'Site Development',           color: '#4a5871' },
+  };
+
+  function rval(id, fallback) {
+    var el = document.getElementById(id);
+    if (!el) return fallback;
+    var v = parseFloat(el.value);
+    return isNaN(v) ? fallback : v;
+  }
+
+  function fmtC(n) { return '₹' + Math.round(n).toLocaleString('en-IN'); }
+  function fmtL(n) {
+    if (n >= 10000000) return '₹' + (n/10000000).toFixed(1) + ' Cr';
+    if (n >= 100000)   return '₹' + (n/100000).toFixed(1) + ' L';
+    return fmtC(n);
+  }
+
+  window.eGoTab = function(n) {
+    [1,2,3].forEach(function(i){
+      document.getElementById('e-panel'+i).classList.toggle('active', i===n);
+      document.getElementById('e-tab'+i).classList.toggle('active', i===n);
+    });
+  };
+
+  window.eSelectType = function(type) {
+    E_TYPE = type;
+    document.querySelectorAll('.e-type-card').forEach(function(c){ c.classList.remove('selected'); });
+    document.getElementById('etype-'+type).classList.add('selected');
+    var plotFg = document.getElementById('e-plot-area-fg');
+    if (plotFg) plotFg.style.display = (type === 'plot') ? 'flex' : 'none';
+    // Auto-adjust scope for type
+    if (type === 'interior') {
+      ['civil','mep','flooring','doors','paint'].forEach(function(s){
+        var el = document.querySelector('[data-scope="'+s+'"]');
+        if (el && s === 'civil') { el.classList.remove('checked'); el.querySelector('input').checked = false; }
+      });
+      var intEl = document.querySelector('[data-scope="interior"]');
+      if (intEl) { intEl.classList.add('checked'); intEl.querySelector('input').checked = true; }
+    }
+    if (type === 'renovation') {
+      var demEl = document.querySelector('[data-scope="demolition"]');
+      if (demEl) { demEl.classList.add('checked'); demEl.querySelector('input').checked = true; }
+    }
+    eUpdateLive();
+  };
+
+  window.eToggleScope = function(el) {
+    el.classList.toggle('checked');
+    el.querySelector('input').checked = el.classList.contains('checked');
+    eUpdateLive();
+  };
+
+  window.eSetFinish = function(f) {
+    E_FINISH = f;
+    document.querySelectorAll('.e-finish-opt').forEach(function(b){ b.classList.remove('active'); });
+    document.getElementById('finish-'+f).classList.add('active');
+    eUpdateLive();
+  };
+
+  window.eSaveRates = function() {
+    E_RATES = {
+      rcc:       rval('r-rcc',1800),
+      brick:     rval('r-brick',180),
+      plaster:   rval('r-plaster',60),
+      floorBasic:rval('r-floor-basic',120),
+      floorPrem: rval('r-floor-prem',280),
+      doorExt:   rval('r-door-ext',18000),
+      doorInt:   rval('r-door-int',8000),
+      window:    rval('r-window',6000),
+      facade:    rval('r-facade',220),
+      elec:      rval('r-elec',120),
+      plumb:     rval('r-plumb',90),
+      hvac:      rval('r-hvac',60),
+      kitchen:   rval('r-kitchen',120000),
+      wardrobe:  rval('r-wardrobe',35000),
+      ceilBasic: rval('r-ceil-basic',75),
+      ceilDes:   rval('r-ceil-des',180),
+      paint:     rval('r-paint',22),
+      demo:      rval('r-demo',40),
+      tileRen:   rval('r-tile-ren',110),
+      found:     rval('r-found',250),
+      bwall:     rval('r-bwall',1200),
+      site:      rval('r-site',30),
+      overhead:  rval('r-overhead',15),
+      contingency:rval('r-contingency',10),
+    };
+    eGoTab(2);
+  };
+
+  function eGetScope() {
+    var s = {};
+    document.querySelectorAll('.e-scope-item').forEach(function(el){
+      s[el.dataset.scope] = el.classList.contains('checked');
+    });
+    return s;
+  }
+
+  function eCompute() {
+    if (!E_RATES.rcc) { eSaveRates(); } // use defaults if not configured
+    var R = E_RATES;
+    var bua   = parseFloat(document.getElementById('e-bua')?.value) || 0;
+    var floors= parseFloat(document.getElementById('e-floors')?.value) || 1;
+    var plot  = parseFloat(document.getElementById('e-plot')?.value) || 0;
+    var beds  = parseFloat(document.getElementById('e-beds')?.value) || 0;
+    var baths = parseFloat(document.getElementById('e-baths')?.value) || 0;
+    var kits  = parseFloat(document.getElementById('e-kitchens')?.value) || 0;
+    var wards = parseFloat(document.getElementById('e-wardrobes')?.value) || 0;
+    var scope = eGetScope();
+    var fm    = FINISH_MULT[E_FINISH] || 1;
+    var totalBua = bua * floors;
+
+    var lines = {};
+
+    // Civil
+    if (scope.civil && E_TYPE !== 'interior') {
+      var civilRate = R.rcc + R.brick + R.plaster;
+      lines.civil = totalBua * civilRate * fm;
+      if (E_TYPE === 'plot' && plot > 0) {
+        lines.civil += plot * R.found * fm;
+      }
+    }
+    // MEP
+    if (scope.mep) {
+      lines.mep = totalBua * (R.elec + R.plumb + R.hvac) * fm;
+    }
+    // Flooring
+    if (scope.flooring) {
+      var fRate = E_FINISH === 'basic' ? R.floorBasic : R.floorPrem;
+      lines.flooring = totalBua * fRate;
+    }
+    // Doors & Windows
+    if (scope.doors) {
+      var extDoors = Math.max(1, Math.round(floors));
+      var intDoors = Math.max(beds, 1) + baths;
+      var windows  = Math.max(beds * 2, 4) * floors;
+      lines.doors = (extDoors * R.doorExt + intDoors * R.doorInt + windows * R.window) * fm;
+    }
+    // Interior fitout
+    if (scope.interior) {
+      var intCost = kits * R.kitchen + wards * R.wardrobe;
+      if (intCost === 0) intCost = totalBua * 350 * fm; // default per sqft if no units given
+      lines.interior = intCost * fm;
+    }
+    // Façade
+    if (scope.facade) {
+      var perimEst = Math.sqrt(totalBua) * 4;
+      lines.facade = perimEst * (floors * 10) * R.facade * fm * 0.4;
+    }
+    // Ceiling
+    if (scope.ceiling) {
+      var cRate = (E_FINISH === 'premium' || E_FINISH === 'luxury') ? R.ceilDes : R.ceilBasic;
+      lines.ceiling = totalBua * cRate * fm;
+    }
+    // Paint
+    if (scope.paint) {
+      lines.paint = totalBua * 2.5 * R.paint * fm;
+    }
+    // Demolition
+    if (scope.demolition) {
+      lines.demolition = totalBua * (R.demo + R.tileRen) * fm;
+    }
+    // Site work
+    if (scope.sitework && E_TYPE === 'plot' && plot > 0) {
+      var perim = Math.sqrt(plot) * 4;
+      lines.sitework = plot * R.site + perim * R.bwall;
+    } else if (scope.sitework) {
+      lines.sitework = totalBua * R.site;
+    }
+
+    // Subtotal
+    var sub = Object.values(lines).reduce(function(a,b){ return a+b; }, 0);
+    // Overhead
+    var overheadAmt = sub * ((R.overhead||15)/100);
+    // Contingency
+    var contAmt = (sub + overheadAmt) * ((R.contingency||10)/100);
+    var total = sub + overheadAmt + contAmt;
+    var low   = total * 0.85;
+    var high  = total * 1.15;
+
+    return { lines, sub, overheadAmt, contAmt, total, low, high, totalBua, bua, floors };
+  }
+
+  window.eUpdateLive = function() {
+    // Just keep scope in sync
+    E_SCOPE = eGetScope();
+  };
+
+  window.eCalculate = function() {
+    if (!document.getElementById('e-bua').value) {
+      alert('Please enter the built-up area (sqft) first.');
+      return;
+    }
+    if (!E_TYPE) { alert('Please select a project type.'); return; }
+    if (!E_RATES.rcc) eSaveRates();
+
+    var r = eCompute();
+
+    // Hero
+    document.getElementById('e-res-project-label').textContent =
+      ['residential','commercial','interior','renovation','plot'].indexOf(E_TYPE) >= 0
+        ? ({residential:'Residential Project',commercial:'Commercial Project',interior:'Interior Fitout',renovation:'Renovation Project',plot:'Plot + Construction'})[E_TYPE]
+        : 'Project';
+    document.getElementById('e-res-range').textContent = fmtL(r.low) + ' – ' + fmtL(r.high);
+    document.getElementById('e-res-sub').textContent =
+      r.totalBua + ' sqft built-up · ' + FINISH_LABEL[E_FINISH] + ' finish · ' + Object.keys(r.lines).length + ' work items';
+
+    // Summary cards
+    var clientName = document.getElementById('e-client-name')?.value || '—';
+    var siteLoc    = document.getElementById('e-site-loc')?.value || '—';
+    document.getElementById('e-res-grid').innerHTML =
+      '<div class="e-result-card"><div class="rc-lbl">Base cost</div><div class="rc-val">'+fmtL(r.sub)+'</div><div class="rc-sub">Before overhead & contingency</div></div>' +
+      '<div class="e-result-card"><div class="rc-lbl">Total estimate</div><div class="rc-val">'+fmtL(r.total)+'</div><div class="rc-sub">Incl. '+E_RATES.overhead+'% OH + '+E_RATES.contingency+'% contingency</div></div>' +
+      '<div class="e-result-card"><div class="rc-lbl">Cost per sqft</div><div class="rc-val">'+fmtC(r.total/Math.max(r.totalBua,1))+'</div><div class="rc-sub">Overall blended rate</div></div>' +
+      '<div class="e-result-card"><div class="rc-lbl">Client / Site</div><div class="rc-val" style="font-size:0.85rem">'+clientName+'</div><div class="rc-sub">'+siteLoc+'</div></div>';
+
+    // Breakdown
+    var bdHtml = '';
+    Object.keys(r.lines).forEach(function(key){
+      var meta = SCOPE_META[key] || {label:key,color:'#6B6560'};
+      var pct  = Math.round(r.lines[key]/r.total*100);
+      bdHtml += '<div class="e-breakdown-row"><div class="e-breakdown-label"><span class="e-breakdown-dot" style="background:'+meta.color+'"></span>'+meta.label+'</div><div>'+fmtL(r.lines[key])+' <span style="color:#A09A94;font-size:10px">('+pct+'%)</span></div></div>';
+    });
+    bdHtml += '<div class="e-breakdown-row"><div class="e-breakdown-label"><span class="e-breakdown-dot" style="background:#6B6560"></span>Overhead ('+E_RATES.overhead+'%)</div><div>'+fmtL(r.overheadAmt)+'</div></div>';
+    bdHtml += '<div class="e-breakdown-row"><div class="e-breakdown-label"><span class="e-breakdown-dot" style="background:#A09A94"></span>Contingency ('+E_RATES.contingency+'%)</div><div>'+fmtL(r.contAmt)+'</div></div>';
+    bdHtml += '<div class="e-breakdown-row total"><div class="e-breakdown-label">TOTAL ESTIMATE</div><div>'+fmtL(r.total)+'</div></div>';
+    document.getElementById('e-breakdown').innerHTML = bdHtml;
+
+    eGoTab(3);
+  };
+
+  window.eReset = function() {
+    E_TYPE = 'residential'; E_FINISH = 'standard';
+    document.querySelectorAll('.e-type-card').forEach(function(c){ c.classList.remove('selected'); });
+    ['e-bua','e-floors','e-plot','e-beds','e-baths','e-kitchens','e-wardrobes','e-client-name','e-site-loc'].forEach(function(id){
+      var el = document.getElementById(id); if(el) el.value = (id==='e-floors'?'1':'');
+    });
+    document.querySelectorAll('.e-finish-opt').forEach(function(b){ b.classList.remove('active'); });
+    document.getElementById('finish-standard').classList.add('active');
+    eGoTab(2);
+  };
+
+  window.eExport = function() {
+    var r = eCompute();
+    var clientName = document.getElementById('e-client-name')?.value || '—';
+    var siteLoc    = document.getElementById('e-site-loc')?.value || '—';
+    var ts = new Date().toLocaleString('en-IN',{dateStyle:'medium',timeStyle:'short'});
+    var projLabel = ({residential:'Residential Project',commercial:'Commercial Project',interior:'Interior Fitout',renovation:'Renovation Project',plot:'Plot + Construction'})[E_TYPE]||'Project';
+
+    var breakdownRows = '';
+    Object.keys(r.lines).forEach(function(key){
+      var meta = SCOPE_META[key]||{label:key};
+      var pct  = Math.round(r.lines[key]/r.total*100);
+      breakdownRows += '<tr><td>'+meta.label+'</td><td style="text-align:right">'+fmtL(r.lines[key])+'</td><td style="text-align:right;color:#6B6560">'+pct+'%</td></tr>';
+    });
+    breakdownRows += '<tr><td>Overhead ('+E_RATES.overhead+'%)</td><td style="text-align:right">'+fmtL(r.overheadAmt)+'</td><td></td></tr>';
+    breakdownRows += '<tr><td>Contingency ('+E_RATES.contingency+'%)</td><td style="text-align:right">'+fmtL(r.contAmt)+'</td><td></td></tr>';
+
+    var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Cost Estimate — Modern Structures</title>'+
+      '<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Fraunces:ital,wght@0,300;0,600&display=swap" rel="stylesheet">'+
+      '<style>*{box-sizing:border-box;margin:0;padding:0}body{background:#f6f7f9;font-family:"JetBrains Mono",monospace;padding:2rem;color:#0a2540}'+
+      '.w{max-width:700px;margin:0 auto}.hero{background:#0a2540;color:#fff;border-radius:8px;padding:1.5rem;margin-bottom:1.25rem}'+
+      '.hero h1{font-family:"Fraunces",serif;font-size:1rem;font-weight:300;font-style:italic;color:rgba(255,255,255,.6);margin-bottom:4px}'+
+      '.range{font-size:2rem;font-weight:500;color:#ffc629;margin-bottom:4px}.sub{font-size:11px;color:rgba(255,255,255,.4)}'+
+      '.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1.25rem}'+
+      '.card{background:#fff;border:1px solid #E2DDD6;border-radius:6px;padding:10px 12px}'+
+      '.cl{font-size:9px;text-transform:uppercase;letter-spacing:.07em;color:#6B6560;margin-bottom:4px}'+
+      '.cv{font-size:1rem;font-weight:500}.cs{font-size:10px;color:#6B6560;margin-top:2px}'+
+      'h2{font-family:"Fraunces",serif;font-size:.95rem;font-weight:600;margin:1rem 0 .5rem}'+
+      'table{width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden;border:1px solid #E2DDD6}'+
+      'th{text-align:left;padding:8px 12px;font-size:9px;letter-spacing:.07em;text-transform:uppercase;color:#6B6560;background:#f6f7f9;border-bottom:1px solid #E2DDD6}'+
+      'td{padding:8px 12px;border-bottom:1px solid #E2DDD6;font-size:11px}tr:last-child td{border-bottom:none}'+
+      '.total-row{background:#0a2540;color:#fff;font-weight:500}.total-row td:nth-child(2){color:#ffc629}'+
+      '.disc{font-size:10px;color:#6B6560;background:#fff7d6;border:1px solid #f0d87a;border-radius:5px;padding:10px 12px;margin-top:1rem;line-height:1.6}'+
+      '.footer{margin-top:1.5rem;font-size:10px;color:#A09A94;display:flex;justify-content:space-between;border-top:1px solid #E2DDD6;padding-top:1rem}'+
+      '</style></head><body><div class="w">'+
+      '<div class="hero"><h1>'+projLabel+' — Cost Estimate</h1>'+
+      '<div class="range">'+fmtL(r.low)+' – '+fmtL(r.high)+'</div>'+
+      '<div class="sub">'+r.totalBua+' sqft · '+FINISH_LABEL[E_FINISH]+' finish · '+Object.keys(r.lines).length+' work items</div></div>'+
+      '<div class="grid">'+
+      '<div class="card"><div class="cl">Base cost</div><div class="cv">'+fmtL(r.sub)+'</div><div class="cs">Before overhead & contingency</div></div>'+
+      '<div class="card"><div class="cl">Total estimate</div><div class="cv">'+fmtL(r.total)+'</div><div class="cs">Incl. OH + contingency</div></div>'+
+      '<div class="card"><div class="cl">Cost per sqft</div><div class="cv">'+fmtC(r.total/Math.max(r.totalBua,1))+'</div><div class="cs">Blended rate</div></div>'+
+      '<div class="card"><div class="cl">Client / Site</div><div class="cv" style="font-size:.85rem">'+clientName+'</div><div class="cs">'+siteLoc+'</div></div>'+
+      '</div>'+
+      '<h2>Cost Breakdown</h2>'+
+      '<table><thead><tr><th>Item</th><th style="text-align:right">Amount</th><th style="text-align:right">% of total</th></tr></thead>'+
+      '<tbody>'+breakdownRows+'</tbody>'+
+      '<tr class="total-row"><td><strong>TOTAL</strong></td><td style="text-align:right"><strong>'+fmtL(r.total)+'</strong></td><td></td></tr>'+
+      '</table>'+
+      '<div class="disc">⚠ This is a rough order-of-magnitude estimate. Actual costs depend on soil conditions, structural design, material selection, and site access. A detailed BOQ will be prepared after a site visit.</div>'+
+      '<div class="footer"><span>Prepared by Modern Structures · Noida · +91 98188 18865</span><span>'+ts+'</span></div>'+
+      '</div></body></html>';
+
+    var blob = new Blob([html],{type:'text/html'});
+    var url  = URL.createObjectURL(blob);
+    var a    = document.createElement('a');
+    a.href = url; a.download = 'cost-estimate-modern-structures.html';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+  };
+
+  // Init with defaults on first open
+  document.addEventListener('DOMContentLoaded', function(){ eSelectType('residential'); });
+  eSelectType('residential');
+})();
+</script>
+<!-- ═══════════ ESTIMATOR APP ENDS HERE ═══════════ -->
+
+    </div><!-- .estimator-modal__body -->
+  </div><!-- .estimator-modal__panel -->
+</div><!-- .estimator-modal -->
+
+<script>
+  (function(){
+    var btn   = document.getElementById('estimatorFloatBtn');
+    var modal = document.getElementById('estimatorModal');
+    var close = document.getElementById('estimatorModalClose');
+    if (!btn || !modal) return;
+    btn.addEventListener('click', function(){ modal.classList.add('is-open'); document.body.style.overflow='hidden'; });
+    close.addEventListener('click', function(){ modal.classList.remove('is-open'); document.body.style.overflow=''; });
+    modal.addEventListener('click', function(e){ if(e.target===modal){ modal.classList.remove('is-open'); document.body.style.overflow=''; } });
+    document.addEventListener('keydown', function(e){ if(e.key==='Escape' && modal.classList.contains('is-open')){ modal.classList.remove('is-open'); document.body.style.overflow=''; } });
+  })();
+</script>
+
 </body>
 </html>
