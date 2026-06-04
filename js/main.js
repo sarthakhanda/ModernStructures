@@ -459,11 +459,6 @@
         clMasonryFolio();
         clSlickSlider();
         clSmoothScroll();
-        clPlaceholder();
-        clAlertBoxes();
-        clContactForm();
-        clAOS();
-        clAjaxChimp();
         clBackToTop();
 
     })();
