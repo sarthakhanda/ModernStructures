@@ -19,10 +19,6 @@
 <script src="https://kit.fontawesome.com/2ee0bb8967.js" crossorigin="anonymous"></script>
 
 <style>
-  /* =========================================================
-     MODERN STRUCTURES - Big Construction Co. Aesthetic
-     Palette: deep navy (trust) + structural yellow (energy)
-     ========================================================= */
   :root {
     --navy:        #0a2540;
     --navy-deep:   #061a30;
@@ -3552,5 +3548,600 @@ tr:last-child td{border-bottom:none}
   })();
 </script>
 
+</body>
+</html>
+
+<!-- =========================================================
+     PUNCH LIST / SNAG TRACKER — Floating Button
+     ========================================================= -->
+<button class="snag-fab" id="snagFloatBtn" aria-label="Open Punch List">
+  <span class="snag-fab__dot"></span>
+  <i class="fa-solid fa-list-check"></i>
+  Punch List
+</button>
+
+<!-- =========================================================
+     PUNCH LIST / SNAG TRACKER — Modal
+     ========================================================= -->
+<div class="snag-modal" id="snagModal" role="dialog" aria-modal="true">
+  <div class="snag-modal__panel">
+    <div class="snag-modal__header">
+      <div class="snag-modal__header-left">
+        <div class="snag-modal__icon"><i class="fa-solid fa-list-check"></i></div>
+        <div>
+          <div class="snag-modal__heading">Punch List</div>
+          <div class="snag-modal__sub">Modern Structures · Snag Tracker</div>
+        </div>
+      </div>
+      <button class="snag-modal__close" id="snagModalClose"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="snag-modal__body">
+
+<!-- ═══════════ SNAG APP ═══════════ -->
+<style>
+  /* FAB — stacks above estimator */
+  .snag-fab {
+    position: fixed; bottom: 148px; right: 28px; z-index: 900;
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 13px 22px; background: #8B2020; color: #fff;
+    border-radius: 999px; font-family: var(--mono); font-size: 12px;
+    font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
+    border: none; cursor: pointer;
+    box-shadow: 0 8px 28px -6px rgba(139,32,32,0.45);
+    transition: all 0.3s var(--ease);
+  }
+  .snag-fab:hover { background: #0a2540; transform: translateY(-3px); box-shadow: 0 14px 32px -8px rgba(10,37,64,0.45); }
+  .snag-fab i { font-size: 13px; }
+  .snag-fab__dot { width:8px;height:8px;background:#ffc629;border-radius:50%;flex-shrink:0;animation:fab-pulse 2s ease-in-out infinite; }
+
+  /* Modal — slides from right like delivery tracker */
+  .snag-modal {
+    position:fixed;inset:0;z-index:997;background:rgba(6,26,48,0.65);
+    backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);
+    display:flex;align-items:stretch;justify-content:flex-end;
+    opacity:0;pointer-events:none;transition:opacity 0.3s ease;
+  }
+  .snag-modal.is-open { opacity:1;pointer-events:all; }
+  .snag-modal__panel {
+    width:100%;max-width:860px;background:#F5F2EC;
+    display:flex;flex-direction:column;
+    transform:translateX(60px);transition:transform 0.4s ease;overflow:hidden;
+  }
+  .snag-modal.is-open .snag-modal__panel { transform:translateX(0); }
+  .snag-modal__header {
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 24px;background:#8B2020;flex-shrink:0;
+  }
+  .snag-modal__header-left { display:flex;align-items:center;gap:12px; }
+  .snag-modal__icon { width:32px;height:32px;background:#ffc629;border-radius:6px;display:grid;place-items:center;color:#8B2020;font-size:14px;flex-shrink:0; }
+  .snag-modal__heading { font-family:var(--display);font-size:15px;font-weight:600;color:#fff;letter-spacing:-0.01em; }
+  .snag-modal__sub { font-family:var(--mono);font-size:9px;color:rgba(255,255,255,0.5);letter-spacing:0.12em;text-transform:uppercase;margin-top:1px; }
+  .snag-modal__close { width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,255,255,0.25);background:none;color:rgba(255,255,255,0.8);font-size:16px;display:grid;place-items:center;cursor:pointer;transition:all 0.2s; }
+  .snag-modal__close:hover { background:#ffc629;color:#8B2020;border-color:#ffc629; }
+  .snag-modal__body { flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch; }
+
+  /* ── App styles ── */
+  .snag-app *, .snag-app *::before, .snag-app *::after { box-sizing:border-box;margin:0;padding:0; }
+  .snag-app { font-family:'JetBrains Mono',ui-monospace,monospace;background:#F5F2EC;color:#1A1714;padding:1.5rem 1.5rem 3rem;min-height:100%; }
+  .snag-app button { font-family:'JetBrains Mono',ui-monospace,monospace;cursor:pointer; }
+
+  /* Mode switcher */
+  .sn-mode-strip { display:flex;gap:8px;margin-bottom:1.75rem; }
+  .sn-mode-btn { flex:1;padding:10px 8px;font-size:11px;letter-spacing:0.05em;text-transform:uppercase;text-align:center;cursor:pointer;background:#FDFCF9;color:#6B6560;border:1.5px solid #E2DDD6;border-radius:8px;transition:all 0.15s; }
+  .sn-mode-btn.active { border-color:#8B2020;background:#8B2020;color:#fff; }
+  .sn-mode-btn.active.client { border-color:#0a2540;background:#0a2540; }
+
+  /* Panels */
+  .sn-panel { display:none; }
+  .sn-panel.active { display:block; }
+
+  /* Section title */
+  .sn-sec { font-family:'Fraunces',Georgia,serif;font-size:1rem;font-weight:300;font-style:italic;margin-bottom:1.25rem;color:#6B6560; }
+  .sn-sec strong { color:#1A1714;font-style:normal;font-weight:600; }
+
+  /* Stats bar */
+  .sn-stats { display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:#E2DDD6;border:1px solid #E2DDD6;border-radius:8px;overflow:hidden;margin-bottom:1.5rem; }
+  .sn-stat { background:#FDFCF9;padding:.75rem 1rem;display:flex;flex-direction:column;gap:3px; }
+  .sn-stat .sn { font-size:1.4rem;font-weight:500; }
+  .sn-stat .sl { font-size:9px;color:#6B6560;text-transform:uppercase;letter-spacing:.07em; }
+  .sn-stat.open .sn { color:#8B2020; }
+  .sn-stat.progress .sn { color:#8B5E00; }
+  .sn-stat.fixed .sn { color:#1e5fbf; }
+  .sn-stat.closed .sn { color:#2A7A4F; }
+
+  /* Filter tabs */
+  .sn-filters { display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1.25rem; }
+  .sn-filter { padding:5px 12px;font-size:10px;letter-spacing:0.05em;text-transform:uppercase;border:1px solid #E2DDD6;border-radius:99px;background:#FDFCF9;color:#6B6560;cursor:pointer;transition:all 0.15s; }
+  .sn-filter.active { background:#1A1714;color:#fff;border-color:#1A1714; }
+
+  /* Snag cards */
+  .sn-list { display:flex;flex-direction:column;gap:8px;margin-bottom:1.5rem; }
+  .sn-card { background:#FDFCF9;border:1px solid #E2DDD6;border-radius:8px;overflow:hidden; }
+  .sn-card.status-open     { border-left:3px solid #8B2020; }
+  .sn-card.status-fixed    { border-left:3px solid #1e5fbf; }
+  .sn-card.status-approved { border-left:3px solid #2A7A4F; }
+  .sn-card.status-rejected { border-left:3px solid #D4A017; }
+  .sn-card-head { display:flex;align-items:flex-start;gap:10px;padding:10px 14px;cursor:pointer; }
+  .sn-card-head:hover { background:rgba(0,0,0,0.02); }
+  .sn-status-pill { padding:2px 8px;border-radius:99px;font-size:9px;font-weight:500;text-transform:uppercase;letter-spacing:0.05em;flex-shrink:0;margin-top:2px; }
+  .pill-open     { background:#fdeaea;color:#8B2020; }
+  .pill-fixed    { background:#e8f0fb;color:#1e5fbf; }
+  .pill-approved { background:#EBF5EF;color:#2A7A4F; }
+  .pill-rejected { background:#FEF4DC;color:#8B5E00; }
+  .sn-card-body { flex:1;min-width:0; }
+  .sn-card-title { font-size:12px;font-weight:500;color:#1A1714;margin-bottom:3px; }
+  .sn-card-meta { font-size:10px;color:#6B6560;display:flex;flex-wrap:wrap;gap:4px 12px; }
+  .sn-card-meta span { display:flex;align-items:center;gap:4px; }
+  .sn-card-actions { padding:0 14px 10px 14px;display:flex;gap:6px;flex-wrap:wrap; }
+  .sn-act-btn { font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.05em;padding:5px 10px;border-radius:5px;border:1px solid;cursor:pointer;transition:all 0.15s; }
+  .sn-act-fix  { background:#e8f0fb;color:#1e5fbf;border-color:#b8d0f8; }
+  .sn-act-fix:hover  { background:#1e5fbf;color:#fff; }
+  .sn-act-approve { background:#EBF5EF;color:#2A7A4F;border-color:#9FE1CB; }
+  .sn-act-approve:hover { background:#2A7A4F;color:#fff; }
+  .sn-act-reject  { background:#FEF4DC;color:#8B5E00;border-color:#f0d87a; }
+  .sn-act-reject:hover  { background:#8B5E00;color:#fff; }
+  .sn-act-reopen  { background:#fdeaea;color:#8B2020;border-color:#f4b0b0; }
+  .sn-act-reopen:hover  { background:#8B2020;color:#fff; }
+  .sn-card-note { padding:0 14px 10px 14px;font-size:10px;color:#6B6560;background:rgba(0,0,0,0.02);border-top:1px dashed #E2DDD6;padding-top:8px; }
+  .sn-card-note strong { color:#1A1714; }
+
+  /* Photo thumb */
+  .sn-photo-thumb { width:48px;height:48px;border-radius:5px;object-fit:cover;border:1px solid #E2DDD6;flex-shrink:0;cursor:pointer; }
+  .sn-no-photo { width:48px;height:48px;border-radius:5px;background:#E2DDD6;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;color:#A09A94; }
+
+  /* Add snag form */
+  .sn-form { background:#FDFCF9;border:1px solid #E2DDD6;border-radius:8px;padding:1.25rem;margin-bottom:1.5rem; }
+  .sn-form h4 { font-family:'Fraunces',serif;font-size:.95rem;font-weight:600;color:#8B2020;margin-bottom:1rem; }
+  .sn-fg { display:flex;flex-direction:column;gap:4px;margin-bottom:10px; }
+  .sn-fg label { font-size:10px;letter-spacing:0.06em;text-transform:uppercase;color:#6B6560; }
+  .sn-inp { height:34px;padding:0 10px;font-family:'JetBrains Mono',monospace;font-size:12px;border:1px solid #E2DDD6;border-radius:5px;background:#F5F2EC;color:#1A1714;outline:none;width:100%; }
+  .sn-inp:focus { border-color:#8B2020;background:#fff; }
+  textarea.sn-inp { height:70px;padding:8px 10px;resize:vertical; }
+  select.sn-inp { cursor:pointer; }
+  .sn-form-row { display:flex;gap:8px;flex-wrap:wrap; }
+  .sn-form-row .sn-fg { flex:1;min-width:140px; }
+  .sn-photo-upload { display:flex;align-items:center;gap:10px;padding:10px;border:1.5px dashed #E2DDD6;border-radius:6px;cursor:pointer;background:#F5F2EC;transition:all 0.15s; }
+  .sn-photo-upload:hover { border-color:#8B2020;background:#fdeaea; }
+  .sn-photo-upload input { display:none; }
+  .sn-photo-preview { width:60px;height:60px;object-fit:cover;border-radius:5px;display:none; }
+  .sn-photo-label { font-size:11px;color:#6B6560; }
+
+  /* Buttons */
+  .sn-actions { display:flex;gap:8px;flex-wrap:wrap;margin-top:1rem; }
+  .sn-btn { font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;padding:9px 18px;border-radius:6px;cursor:pointer;border:1px solid;transition:all 0.2s; }
+  .sn-btn-primary { background:#8B2020;color:#fff;border-color:#8B2020; }
+  .sn-btn-primary:hover { background:#6b1818;border-color:#6b1818; }
+  .sn-btn-secondary { background:none;color:#6B6560;border-color:#E2DDD6; }
+  .sn-btn-secondary:hover { background:#E2DDD6;color:#1A1714; }
+  .sn-btn-export { background:#2A7A4F;color:#fff;border-color:#2A7A4F; }
+  .sn-btn-export:hover { background:#1f5e3b; }
+  .sn-btn-client { background:#0a2540;color:#fff;border-color:#0a2540; }
+  .sn-btn-client:hover { background:#ffc629;color:#0a2540;border-color:#ffc629; }
+
+  /* Sign-off banner */
+  .sn-signoff-banner { background:#EBF5EF;border:1.5px solid #9FE1CB;border-radius:8px;padding:1.25rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:14px; }
+  .sn-signoff-icon { font-size:28px;flex-shrink:0; }
+  .sn-signoff-text h4 { font-size:13px;font-weight:600;color:#2A7A4F;margin-bottom:2px; }
+  .sn-signoff-text p { font-size:11px;color:#6B6560; }
+
+  /* Empty state */
+  .sn-empty { text-align:center;padding:3rem 1rem;color:#A09A94; }
+  .sn-empty .sn-empty-icon { font-size:36px;margin-bottom:10px; }
+  .sn-empty p { font-size:12px; }
+
+  /* Lightbox */
+  .sn-lightbox { position:fixed;inset:0;z-index:1100;background:rgba(0,0,0,0.9);display:none;align-items:center;justify-content:center;cursor:pointer; }
+  .sn-lightbox.open { display:flex; }
+  .sn-lightbox img { max-width:90vw;max-height:90vh;border-radius:8px;object-fit:contain; }
+
+  @media (max-width:520px) {
+    .sn-stats { grid-template-columns:1fr 1fr; }
+    .snag-fab { bottom:212px;right:16px;padding:11px 16px;font-size:11px; }
+    .snag-modal__panel { max-width:100%; }
+  }
+</style>
+
+<div class="snag-app" id="snag-app">
+
+  <!-- Project header -->
+  <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:1.5rem;">
+    <div class="sn-fg" style="flex:2;min-width:180px;margin-bottom:0">
+      <label>Project name</label>
+      <input class="sn-inp" id="sn-project" type="text" placeholder="e.g. Sharma Residence, Sec 27" oninput="snRender()" />
+    </div>
+    <div class="sn-fg" style="flex:1;min-width:120px;margin-bottom:0">
+      <label>Handover date</label>
+      <input class="sn-inp" id="sn-handover" type="date" />
+    </div>
+  </div>
+
+  <!-- Mode switcher -->
+  <div class="sn-mode-strip">
+    <button class="sn-mode-btn active" id="sn-mode-super" onclick="snSetMode('supervisor')">🔧 Supervisor View</button>
+    <button class="sn-mode-btn client" id="sn-mode-client" onclick="snSetMode('client')">👤 Client View</button>
+  </div>
+
+  <!-- Stats -->
+  <div class="sn-stats">
+    <div class="sn-stat open"><span class="sn" id="sn-count-open">0</span><span class="sl">Open</span></div>
+    <div class="sn-stat progress"><span class="sn" id="sn-count-fixed">0</span><span class="sl">Fixed</span></div>
+    <div class="sn-stat fixed"><span class="sn" id="sn-count-approved">0</span><span class="sl">Approved</span></div>
+    <div class="sn-stat closed"><span class="sn" id="sn-count-total">0</span><span class="sl">Total</span></div>
+  </div>
+
+  <!-- Sign-off banner (shown when all approved) -->
+  <div class="sn-signoff-banner" id="sn-signoff" style="display:none">
+    <div class="sn-signoff-icon">✅</div>
+    <div class="sn-signoff-text">
+      <h4>All snags resolved &amp; approved!</h4>
+      <p>Project is ready for handover. Export the report below.</p>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="sn-filters">
+    <button class="sn-filter active" onclick="snSetFilter('all',this)">All</button>
+    <button class="sn-filter" onclick="snSetFilter('open',this)">Open</button>
+    <button class="sn-filter" onclick="snSetFilter('fixed',this)">Fixed (pending approval)</button>
+    <button class="sn-filter" onclick="snSetFilter('approved',this)">Approved</button>
+    <button class="sn-filter" onclick="snSetFilter('rejected',this)">Sent back</button>
+  </div>
+
+  <!-- Snag list -->
+  <div class="sn-list" id="sn-list"></div>
+
+  <!-- ── SUPERVISOR: Add snag form ── -->
+  <div id="sn-add-section">
+    <div class="sn-form" id="sn-form">
+      <h4>＋ Log New Snag</h4>
+      <div class="sn-fg">
+        <label>Description *</label>
+        <textarea class="sn-inp" id="sn-f-desc" placeholder="Describe the defect or issue clearly..."></textarea>
+      </div>
+      <div class="sn-form-row">
+        <div class="sn-fg">
+          <label>Location on site</label>
+          <input class="sn-inp" id="sn-f-location" type="text" placeholder="e.g. Master bedroom ceiling" />
+        </div>
+        <div class="sn-fg">
+          <label>Trade / Category</label>
+          <select class="sn-inp" id="sn-f-trade">
+            <option value="">— Select —</option>
+            <option>Civil / Structure</option>
+            <option>Plumbing</option>
+            <option>Electrical</option>
+            <option>Tiles / Flooring</option>
+            <option>Paint / Finishing</option>
+            <option>Doors / Windows</option>
+            <option>False Ceiling</option>
+            <option>Carpentry / Joinery</option>
+            <option>HVAC</option>
+            <option>Façade / External</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="sn-fg">
+          <label>Priority</label>
+          <select class="sn-inp" id="sn-f-priority">
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+            <option value="low">Low</option>
+          </select>
+        </div>
+      </div>
+      <div class="sn-fg">
+        <label>Raised by</label>
+        <select class="sn-inp" id="sn-f-raisedby">
+          <option value="Supervisor">Supervisor</option>
+          <option value="Client">Client</option>
+          <option value="Project Manager">Project Manager</option>
+        </select>
+      </div>
+      <!-- Photo upload -->
+      <div class="sn-fg">
+        <label>Photo (optional)</label>
+        <label class="sn-photo-upload" id="sn-photo-upload-label">
+          <input type="file" id="sn-f-photo" accept="image/*" onchange="snPhotoPreview(this)" />
+          <img class="sn-photo-preview" id="sn-photo-preview-img" />
+          <span class="sn-photo-label" id="sn-photo-label-text">📷 Tap to attach photo</span>
+        </label>
+      </div>
+      <div class="sn-actions">
+        <button class="sn-btn sn-btn-primary" onclick="snAddSnag()">Log Snag</button>
+        <button class="sn-btn sn-btn-secondary" onclick="snClearForm()">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Actions -->
+  <div class="sn-actions" style="margin-top:1rem">
+    <button class="sn-btn sn-btn-export" onclick="snExport()">⬇ Export Report</button>
+    <button class="sn-btn sn-btn-secondary" onclick="snClearAll()">Clear All</button>
+  </div>
+
+</div><!-- .snag-app -->
+
+<!-- Lightbox -->
+<div class="sn-lightbox" id="sn-lightbox" onclick="this.classList.remove('open')">
+  <img id="sn-lightbox-img" src="" alt="Snag photo" />
+</div>
+
+<script>
+(function(){
+  var SN_SNAGS  = [];
+  var SN_MODE   = 'supervisor'; // 'supervisor' | 'client'
+  var SN_FILTER = 'all';
+  var SN_ID     = 1;
+  var SN_PHOTO_DATA = null; // base64
+
+  var PRIORITY_COLOR = { high:'#8B2020', medium:'#8B5E00', low:'#2A7A4F' };
+  var PRIORITY_LABEL = { high:'🔴 High', medium:'🟡 Medium', low:'🟢 Low' };
+
+  function snFmt(d){ return new Date(d).toLocaleString('en-IN',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}); }
+
+  window.snSetMode = function(m){
+    SN_MODE = m;
+    document.getElementById('sn-mode-super').classList.toggle('active', m==='supervisor');
+    document.getElementById('sn-mode-client').classList.toggle('active', m==='client');
+    document.getElementById('sn-mode-client').classList.toggle('client', m==='client');
+    var addSec = document.getElementById('sn-add-section');
+    // Both can add snags; form is always visible — just raisedby changes default
+    if(m==='client'){
+      document.getElementById('sn-f-raisedby').value='Client';
+    } else {
+      document.getElementById('sn-f-raisedby').value='Supervisor';
+    }
+    snRender();
+  };
+
+  window.snSetFilter = function(f, el){
+    SN_FILTER = f;
+    document.querySelectorAll('.sn-filter').forEach(function(b){ b.classList.remove('active'); });
+    el.classList.add('active');
+    snRender();
+  };
+
+  window.snPhotoPreview = function(input){
+    if(input.files && input.files[0]){
+      var reader = new FileReader();
+      reader.onload = function(e){
+        SN_PHOTO_DATA = e.target.result;
+        var img = document.getElementById('sn-photo-preview-img');
+        img.src = e.target.result;
+        img.style.display = 'block';
+        document.getElementById('sn-photo-label-text').textContent = '✓ Photo attached';
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+  };
+
+  window.snClearForm = function(){
+    document.getElementById('sn-f-desc').value='';
+    document.getElementById('sn-f-location').value='';
+    document.getElementById('sn-f-trade').value='';
+    document.getElementById('sn-f-priority').value='medium';
+    document.getElementById('sn-f-photo').value='';
+    SN_PHOTO_DATA = null;
+    document.getElementById('sn-photo-preview-img').style.display='none';
+    document.getElementById('sn-photo-label-text').textContent='📷 Tap to attach photo';
+  };
+
+  window.snAddSnag = function(){
+    var desc = document.getElementById('sn-f-desc').value.trim();
+    if(!desc){ alert('Please enter a description.'); return; }
+    var snag = {
+      id:        SN_ID++,
+      desc:      desc,
+      location:  document.getElementById('sn-f-location').value.trim() || '—',
+      trade:     document.getElementById('sn-f-trade').value || 'Other',
+      priority:  document.getElementById('sn-f-priority').value || 'medium',
+      raisedBy:  document.getElementById('sn-f-raisedby').value || 'Supervisor',
+      status:    'open',
+      photo:     SN_PHOTO_DATA,
+      raisedAt:  new Date().toISOString(),
+      fixedAt:   null,
+      approvedAt:null,
+      fixNote:   '',
+      rejectNote:'',
+    };
+    SN_SNAGS.unshift(snag);
+    snClearForm();
+    snRender();
+  };
+
+  window.snMarkFixed = function(id){
+    var note = prompt('Add a fix note (optional):') || '';
+    var snag = SN_SNAGS.find(function(s){ return s.id===id; });
+    if(snag){ snag.status='fixed'; snag.fixedAt=new Date().toISOString(); snag.fixNote=note; }
+    snRender();
+  };
+
+  window.snApprove = function(id){
+    var snag = SN_SNAGS.find(function(s){ return s.id===id; });
+    if(snag){ snag.status='approved'; snag.approvedAt=new Date().toISOString(); }
+    snRender();
+  };
+
+  window.snReject = function(id){
+    var note = prompt('Reason for sending back:') || 'Not fully resolved';
+    var snag = SN_SNAGS.find(function(s){ return s.id===id; });
+    if(snag){ snag.status='rejected'; snag.rejectNote=note; snag.fixedAt=null; }
+    snRender();
+  };
+
+  window.snReopen = function(id){
+    var snag = SN_SNAGS.find(function(s){ return s.id===id; });
+    if(snag){ snag.status='open'; snag.fixedAt=null; snag.approvedAt=null; snag.fixNote=''; snag.rejectNote=''; }
+    snRender();
+  };
+
+  window.snOpenLightbox = function(src){
+    document.getElementById('sn-lightbox-img').src = src;
+    document.getElementById('sn-lightbox').classList.add('open');
+  };
+
+  window.snClearAll = function(){
+    if(confirm('Clear all snags? This cannot be undone.')){ SN_SNAGS=[]; SN_ID=1; snRender(); }
+  };
+
+  function snRender(){
+    // Stats
+    var open=0, fixed=0, approved=0;
+    SN_SNAGS.forEach(function(s){
+      if(s.status==='open'||s.status==='rejected') open++;
+      else if(s.status==='fixed') fixed++;
+      else if(s.status==='approved') approved++;
+    });
+    document.getElementById('sn-count-open').textContent = open;
+    document.getElementById('sn-count-fixed').textContent = fixed;
+    document.getElementById('sn-count-approved').textContent = approved;
+    document.getElementById('sn-count-total').textContent = SN_SNAGS.length;
+
+    // Sign-off banner
+    var allDone = SN_SNAGS.length > 0 && open===0 && fixed===0;
+    document.getElementById('sn-signoff').style.display = allDone ? 'flex' : 'none';
+
+    // Filter
+    var filtered = SN_SNAGS.filter(function(s){
+      if(SN_FILTER==='all') return true;
+      if(SN_FILTER==='open') return s.status==='open'||s.status==='rejected';
+      if(SN_FILTER==='fixed') return s.status==='fixed';
+      if(SN_FILTER==='approved') return s.status==='approved';
+      if(SN_FILTER==='rejected') return s.status==='rejected';
+      return true;
+    });
+
+    var list = document.getElementById('sn-list');
+    if(filtered.length===0){
+      list.innerHTML = '<div class="sn-empty"><div class="sn-empty-icon">📋</div><p>'+(SN_SNAGS.length===0?'No snags logged yet. Add the first one below.':'No snags in this filter.')+'</p></div>';
+      return;
+    }
+
+    list.innerHTML = '';
+    filtered.forEach(function(s){
+      var pillClass = 'pill-'+s.status;
+      var pillText  = ({open:'Open',fixed:'Fixed — awaiting approval',approved:'Approved ✓',rejected:'Sent back'})[s.status]||s.status;
+      var photoHtml = s.photo
+        ? '<img class="sn-photo-thumb" src="'+s.photo+'" onclick="snOpenLightbox(\''+s.photo+'\')" />'
+        : '<div class="sn-no-photo">📷</div>';
+
+      // Action buttons based on mode + status
+      var actBtns = '';
+      if(SN_MODE==='supervisor'){
+        if(s.status==='open'||s.status==='rejected')
+          actBtns += '<button class="sn-act-btn sn-act-fix" onclick="snMarkFixed('+s.id+')">Mark Fixed</button>';
+        if(s.status==='fixed'||s.status==='approved'||s.status==='rejected')
+          actBtns += '<button class="sn-act-btn sn-act-reopen" onclick="snReopen('+s.id+')">Reopen</button>';
+      }
+      if(SN_MODE==='client'){
+        if(s.status==='fixed')
+          actBtns += '<button class="sn-act-btn sn-act-approve" onclick="snApprove('+s.id+')">Approve Fix ✓</button>' +
+                     '<button class="sn-act-btn sn-act-reject" onclick="snReject('+s.id+')">Send Back</button>';
+      }
+
+      // Notes
+      var noteHtml = '';
+      if(s.fixNote) noteHtml += '<div class="sn-card-note"><strong>Fix note:</strong> '+s.fixNote+'</div>';
+      if(s.rejectNote) noteHtml += '<div class="sn-card-note" style="background:#fff7d6"><strong>Sent back:</strong> '+s.rejectNote+'</div>';
+
+      var card = document.createElement('div');
+      card.className = 'sn-card status-'+s.status;
+      card.innerHTML =
+        '<div class="sn-card-head">'+photoHtml+
+        '<div class="sn-card-body">'+
+          '<div class="sn-card-title">#'+s.id+' · '+s.desc+'</div>'+
+          '<div class="sn-card-meta">'+
+            '<span>📍 '+s.location+'</span>'+
+            '<span>🔧 '+s.trade+'</span>'+
+            '<span style="color:'+PRIORITY_COLOR[s.priority]+'">'+PRIORITY_LABEL[s.priority]+'</span>'+
+            '<span>👤 '+s.raisedBy+'</span>'+
+            '<span>🕐 '+snFmt(s.raisedAt)+'</span>'+
+            (s.fixedAt?'<span>🔨 Fixed '+snFmt(s.fixedAt)+'</span>':'')+
+            (s.approvedAt?'<span>✅ Approved '+snFmt(s.approvedAt)+'</span>':'')+
+          '</div>'+
+        '</div>'+
+        '<span class="sn-status-pill '+pillClass+'">'+pillText+'</span>'+
+        '</div>'+
+        (actBtns?'<div class="sn-card-actions">'+actBtns+'</div>':'')+
+        noteHtml;
+      list.appendChild(card);
+    });
+  }
+
+  window.snExport = function(){
+    var proj = document.getElementById('sn-project').value || 'Project';
+    var handover = document.getElementById('sn-handover').value;
+    var ts   = new Date().toLocaleString('en-IN',{dateStyle:'long',timeStyle:'short'});
+    var open=0,fixed=0,approved=0;
+    SN_SNAGS.forEach(function(s){
+      if(s.status==='open'||s.status==='rejected') open++;
+      else if(s.status==='fixed') fixed++;
+      else if(s.status==='approved') approved++;
+    });
+    var rows = SN_SNAGS.map(function(s){
+      var pill = ({open:'<span style="color:#8B2020;font-weight:500">Open</span>',fixed:'<span style="color:#1e5fbf;font-weight:500">Fixed</span>',approved:'<span style="color:#2A7A4F;font-weight:500">Approved ✓</span>',rejected:'<span style="color:#8B5E00;font-weight:500">Sent back</span>'})[s.status]||s.status;
+      var photoCell = s.photo ? '<img src="'+s.photo+'" style="width:48px;height:48px;object-fit:cover;border-radius:4px;border:1px solid #E2DDD6">' : '—';
+      return '<tr><td>#'+s.id+'</td><td>'+s.desc+'</td><td>'+s.location+'</td><td>'+s.trade+'</td>'+
+             '<td>'+PRIORITY_LABEL[s.priority]+'</td><td>'+s.raisedBy+'</td>'+
+             '<td>'+pill+'</td><td>'+(s.fixNote||'—')+'</td><td>'+photoCell+'</td></tr>';
+    }).join('');
+
+    var html = '<!DOCTYPE html><html><head><meta charset="UTF-8">'+
+      '<title>Punch List — '+proj+'</title>'+
+      '<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Fraunces:ital,wght@0,300;0,600&display=swap" rel="stylesheet">'+
+      '<style>*{box-sizing:border-box;margin:0;padding:0}body{background:#f6f7f9;font-family:"JetBrains Mono",monospace;padding:2rem;color:#0a2540}'+
+      '.w{max-width:960px;margin:0 auto}.hero{background:#8B2020;color:#fff;border-radius:8px;padding:1.5rem;margin-bottom:1.25rem}'+
+      '.hero h1{font-family:"Fraunces",serif;font-size:1.3rem;font-weight:300;font-style:italic;margin-bottom:4px}'+
+      '.hero .sub{font-size:11px;color:rgba(255,255,255,.5)}'+
+      '.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1.25rem}'+
+      '.stat{background:#fff;border:1px solid #E2DDD6;border-radius:6px;padding:.75rem 1rem}'+
+      '.stat .n{font-size:1.4rem;font-weight:500;margin-bottom:2px}.stat .l{font-size:9px;color:#6B6560;text-transform:uppercase;letter-spacing:.07em}'+
+      'table{width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden;border:1px solid #E2DDD6;font-size:11px}'+
+      'th{text-align:left;padding:8px 10px;font-size:9px;letter-spacing:.07em;text-transform:uppercase;color:#6B6560;background:#f6f7f9;border-bottom:1px solid #E2DDD6}'+
+      'td{padding:8px 10px;border-bottom:1px solid #E2DDD6;vertical-align:middle}tr:last-child td{border-bottom:none}'+
+      'tr:nth-child(even){background:#fafaf8}'+
+      '.footer{margin-top:1.5rem;font-size:10px;color:#A09A94;display:flex;justify-content:space-between;border-top:1px solid #E2DDD6;padding-top:1rem}'+
+      '</style></head><body><div class="w">'+
+      '<div class="hero"><h1>Punch List — '+proj+'</h1>'+
+      '<div class="sub">Handover: '+(handover||'TBD')+' &nbsp;·&nbsp; Report generated: '+ts+'</div></div>'+
+      '<div class="stats">'+
+      '<div class="stat"><div class="n" style="color:#8B2020">'+open+'</div><div class="l">Open / Sent back</div></div>'+
+      '<div class="stat"><div class="n" style="color:#1e5fbf">'+fixed+'</div><div class="l">Fixed (pending)</div></div>'+
+      '<div class="stat"><div class="n" style="color:#2A7A4F">'+approved+'</div><div class="l">Approved</div></div>'+
+      '<div class="stat"><div class="n">'+SN_SNAGS.length+'</div><div class="l">Total snags</div></div>'+
+      '</div>'+
+      '<table><thead><tr><th>#</th><th>Description</th><th>Location</th><th>Trade</th><th>Priority</th><th>Raised by</th><th>Status</th><th>Fix note</th><th>Photo</th></tr></thead>'+
+      '<tbody>'+rows+'</tbody></table>'+
+      '<div class="footer"><span>Modern Structures · Noida · +91 98188 18865</span><span>'+ts+'</span></div>'+
+      '</div></body></html>';
+
+    var blob = new Blob([html],{type:'text/html'});
+    var url  = URL.createObjectURL(blob);
+    var a    = document.createElement('a');
+    a.href=url; a.download='punch-list-'+proj.replace(/\s+/g,'-').toLowerCase()+'.html';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+  };
+
+  snRender();
+})();
+</script>
+<!-- ═══════════ SNAG APP ENDS HERE ═══════════ -->
+
+    </div><!-- .snag-modal__body -->
+  </div><!-- .snag-modal__panel -->
+</div><!-- .snag-modal -->
+
+<script>
+  (function(){
+    var btn   = document.getElementById('snagFloatBtn');
+    var modal = document.getElementById('snagModal');
+    var close = document.getElementById('snagModalClose');
+    if(!btn||!modal) return;
+    btn.addEventListener('click',function(){ modal.classList.add('is-open'); document.body.style.overflow='hidden'; });
+    close.addEventListener('click',function(){ modal.classList.remove('is-open'); document.body.style.overflow=''; });
+    modal.addEventListener('click',function(e){ if(e.target===modal){ modal.classList.remove('is-open'); document.body.style.overflow=''; } });
+    document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&modal.classList.contains('is-open')){ modal.classList.remove('is-open'); document.body.style.overflow=''; } });
+  })();
+</script>
 </body>
 </html>
