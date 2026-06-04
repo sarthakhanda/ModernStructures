@@ -2231,32 +2231,6 @@
   const yr = document.getElementById('year');
   if (yr) yr.textContent = new Date().getFullYear();
 
-  // ---------- Delivery Tracker Modal
-  const trackerBtn = document.getElementById('trackerFloatBtn');
-  const trackerModal = document.getElementById('trackerModal');
-  const trackerClose = document.getElementById('trackerModalClose');
-  if (trackerBtn && trackerModal) {
-    trackerBtn.addEventListener('click', () => {
-      trackerModal.classList.add('is-open');
-      document.body.style.overflow = 'hidden';
-    });
-    trackerClose.addEventListener('click', () => {
-      trackerModal.classList.remove('is-open');
-      document.body.style.overflow = '';
-    });
-    trackerModal.addEventListener('click', (e) => {
-      if (e.target === trackerModal) {
-        trackerModal.classList.remove('is-open');
-        document.body.style.overflow = '';
-      }
-    });
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && trackerModal.classList.contains('is-open')) {
-        trackerModal.classList.remove('is-open');
-        document.body.style.overflow = '';
-      }
-    });
-  }
 </script>
 
 <!-- =========================================================
@@ -2439,7 +2413,7 @@
   <div class="t-panel active" id="t-panel1">
     <div class="t-sec"><strong>Step 1:</strong> Add items &amp; advance paid</div>
     <div class="t-form-row" style="margin-bottom:1.25rem">
-      <div class="t-fg"><label>Supplier / Party</label><input class="t-inp w" id="t-supplier" type="text" placeholder="e.g. Harsh Honda" /></div>
+      <div class="t-fg"><label>Supplier / Party</label><input class="t-inp w" id="t-supplier" type="text" placeholder="e.g. Harsh Handa" /></div>
       <div class="t-fg"><label>Estimate #</label><input class="t-inp m" id="t-ref" type="text" placeholder="e.g. 004" /></div>
       <div class="t-fg"><label>Date</label><input class="t-inp m" id="t-date" type="text" placeholder="DD/MM/YY" /></div>
     </div>
@@ -2456,7 +2430,7 @@
     </div>
     <div class="t-actions">
       <button class="t-btn t-btn-primary" onclick="tProceed()">Proceed to Checklist →</button>
-      <button class="t-btn t-btn-secondary" onclick="tLoadPreset()">Load Harsh Honda estimate</button>
+      <button class="t-btn t-btn-secondary" onclick="tLoadPreset()">Load Harsh Handa estimate</button>
     </div>
   </div>
 
@@ -2568,7 +2542,7 @@
   window.tLoadPreset = function(){
     T_ROWS.forEach(id=>{const el=document.getElementById('t-brow-'+id);if(el)el.remove();}); T_ROWS=[];
     document.getElementById('t-build-list').innerHTML='';
-    document.getElementById('t-supplier').value='Harsh Honda';
+    document.getElementById('t-supplier').value='Harsh Handa';
     document.getElementById('t-ref').value='004';
     document.getElementById('t-date').value='31/5/26';
     document.getElementById('t-advance').value='75000';
@@ -2750,6 +2724,37 @@ tr:last-child td{border-bottom:none}
     </div><!-- .tracker-modal__body -->
   </div><!-- .tracker-modal__panel -->
 </div><!-- .tracker-modal -->
+
+<script>
+  // Runs after the button + modal are in the DOM
+  (function() {
+    var btn   = document.getElementById('trackerFloatBtn');
+    var modal = document.getElementById('trackerModal');
+    var close = document.getElementById('trackerModalClose');
+    if (!btn || !modal) return;
+
+    btn.addEventListener('click', function() {
+      modal.classList.add('is-open');
+      document.body.style.overflow = 'hidden';
+    });
+    close.addEventListener('click', function() {
+      modal.classList.remove('is-open');
+      document.body.style.overflow = '';
+    });
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) {
+        modal.classList.remove('is-open');
+        document.body.style.overflow = '';
+      }
+    });
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && modal.classList.contains('is-open')) {
+        modal.classList.remove('is-open');
+        document.body.style.overflow = '';
+      }
+    });
+  })();
+</script>
 
 </body>
 </html>
