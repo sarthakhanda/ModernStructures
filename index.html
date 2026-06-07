@@ -4143,3 +4143,766 @@ tr:last-child td{border-bottom:none}
 </script>
 </body>
 </html>
+
+<!-- =========================================================
+     SITE LOG — Floating Button
+     ========================================================= -->
+<button class="sitelog-fab" id="sitelogFloatBtn" aria-label="Open Site Log">
+  <span class="sitelog-fab__dot"></span>
+  <svg class="fa-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="currentColor"><path d="M40 48C26.7 48 16 58.7 16 72v48c0 13.3 10.7 24 24 24H88c13.3 0 24-10.7 24-24V72c0-13.3-10.7-24-24-24H40zM192 64c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zm0 160c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zm0 160c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zM16 232v48c0 13.3 10.7 24 24 24H88c13.3 0 24-10.7 24-24V232c0-13.3-10.7-24-24-24H40c-13.3 0-24 10.7-24 24zM40 368c-13.3 0-24 10.7-24 24v48c0 13.3 10.7 24 24 24H88c13.3 0 24-10.7 24-24V392c0-13.3-10.7-24-24-24H40z"/></svg>
+  Site Log
+</button>
+
+<!-- =========================================================
+     SITE LOG — Modal
+     ========================================================= -->
+<div class="sitelog-modal" id="sitelogModal" role="dialog" aria-modal="true">
+  <div class="sitelog-modal__panel">
+    <div class="sitelog-modal__header">
+      <div class="sitelog-modal__header-left">
+        <div class="sitelog-modal__icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="currentColor" style="width:16px;height:16px"><path d="M40 48C26.7 48 16 58.7 16 72v48c0 13.3 10.7 24 24 24H88c13.3 0 24-10.7 24-24V72c0-13.3-10.7-24-24-24H40zM192 64c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zm0 160c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zm0 160c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zM16 232v48c0 13.3 10.7 24 24 24H88c13.3 0 24-10.7 24-24V232c0-13.3-10.7-24-24-24H40c-13.3 0-24 10.7-24 24zM40 368c-13.3 0-24 10.7-24 24v48c0 13.3 10.7 24 24 24H88c13.3 0 24-10.7 24-24V392c0-13.3-10.7-24-24-24H40z"/></svg>
+        </div>
+        <div>
+          <div class="sitelog-modal__heading">Daily Site Log</div>
+          <div class="sitelog-modal__sub">Modern Structures · Labour & Progress</div>
+        </div>
+      </div>
+      <button class="sitelog-modal__close" id="sitelogModalClose">✕</button>
+    </div>
+    <div class="sitelog-modal__body">
+
+<!-- ═══════════ SITE LOG APP ═══════════ -->
+<style>
+  .sitelog-fab {
+    position:fixed;bottom:208px;right:28px;z-index:900;
+    display:inline-flex;align-items:center;gap:10px;
+    padding:13px 22px;background:#2A7A4F;color:#fff;
+    border-radius:999px;font-family:var(--mono);font-size:12px;
+    font-weight:500;letter-spacing:0.08em;text-transform:uppercase;
+    border:none;cursor:pointer;
+    box-shadow:0 8px 28px -6px rgba(42,122,79,0.45);
+    transition:all 0.3s var(--ease);
+  }
+  .sitelog-fab:hover{background:#0a2540;transform:translateY(-3px);box-shadow:0 14px 32px -8px rgba(10,37,64,0.45);}
+  .sitelog-fab .fa-svg{width:13px;height:13px;}
+  .sitelog-fab__dot{width:8px;height:8px;background:#ffc629;border-radius:50%;flex-shrink:0;animation:fab-pulse 2s ease-in-out infinite;}
+
+  .sitelog-modal{
+    position:fixed;inset:0;z-index:996;background:rgba(6,26,48,0.65);
+    backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);
+    display:flex;align-items:stretch;justify-content:flex-end;
+    opacity:0;pointer-events:none;transition:opacity 0.3s ease;
+  }
+  .sitelog-modal.is-open{opacity:1;pointer-events:all;}
+  .sitelog-modal__panel{
+    width:100%;max-width:900px;background:#F5F2EC;
+    display:flex;flex-direction:column;
+    transform:translateX(60px);transition:transform 0.4s ease;overflow:hidden;
+  }
+  .sitelog-modal.is-open .sitelog-modal__panel{transform:translateX(0);}
+  .sitelog-modal__header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 24px;background:#2A7A4F;flex-shrink:0;
+  }
+  .sitelog-modal__header-left{display:flex;align-items:center;gap:12px;}
+  .sitelog-modal__icon{width:32px;height:32px;background:#ffc629;border-radius:6px;display:grid;place-items:center;color:#2A7A4F;flex-shrink:0;}
+  .sitelog-modal__heading{font-family:var(--display);font-size:15px;font-weight:600;color:#fff;letter-spacing:-0.01em;}
+  .sitelog-modal__sub{font-family:var(--mono);font-size:9px;color:rgba(255,255,255,0.5);letter-spacing:0.12em;text-transform:uppercase;margin-top:1px;}
+  .sitelog-modal__close{width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,255,255,0.25);background:none;color:rgba(255,255,255,0.8);font-size:16px;display:grid;place-items:center;cursor:pointer;transition:all 0.2s;}
+  .sitelog-modal__close:hover{background:#ffc629;color:#2A7A4F;border-color:#ffc629;}
+  .sitelog-modal__body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+
+  /* ── App ── */
+  .sl-app*,.sl-app *::before,.sl-app *::after{box-sizing:border-box;margin:0;padding:0;}
+  .sl-app{font-family:'JetBrains Mono',ui-monospace,monospace;background:#F5F2EC;color:#1A1714;padding:1.5rem 1.5rem 3rem;min-height:100%;}
+  .sl-app button{font-family:'JetBrains Mono',ui-monospace,monospace;cursor:pointer;}
+
+  /* Tabs */
+  .sl-tabs{display:flex;border:1px solid #E2DDD6;border-radius:8px;overflow:hidden;margin-bottom:1.75rem;}
+  .sl-tab{flex:1;padding:9px 6px;font-size:10px;letter-spacing:0.05em;text-transform:uppercase;text-align:center;cursor:pointer;background:#FDFCF9;color:#6B6560;border:none;border-right:1px solid #E2DDD6;transition:all 0.15s;}
+  .sl-tab:last-child{border-right:none;}
+  .sl-tab.active{background:#2A7A4F;color:#fff;}
+  .sl-panel{display:none;}
+  .sl-panel.active{display:block;}
+
+  .sl-sec{font-family:'Fraunces',Georgia,serif;font-size:1rem;font-weight:300;font-style:italic;margin-bottom:1.25rem;color:#6B6560;}
+  .sl-sec strong{color:#1A1714;font-style:normal;font-weight:600;}
+
+  /* Project meta */
+  .sl-meta-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.5rem;}
+  .sl-fg{display:flex;flex-direction:column;gap:4px;}
+  .sl-fg label{font-size:10px;letter-spacing:0.06em;text-transform:uppercase;color:#6B6560;}
+  .sl-inp{height:34px;padding:0 10px;font-family:'JetBrains Mono',monospace;font-size:12px;border:1px solid #E2DDD6;border-radius:5px;background:#F5F2EC;color:#1A1714;outline:none;width:100%;}
+  .sl-inp:focus{border-color:#2A7A4F;background:#fff;}
+  textarea.sl-inp{height:64px;padding:8px 10px;resize:vertical;}
+  select.sl-inp{cursor:pointer;}
+
+  /* Attendance grid */
+  .sl-att-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-bottom:1.5rem;}
+  .sl-trade-card{background:#FDFCF9;border:1px solid #E2DDD6;border-radius:8px;padding:12px 14px;display:flex;align-items:center;gap:10px;}
+  .sl-trade-card .sl-trade-name{flex:1;font-size:12px;color:#1A1714;}
+  .sl-trade-card .sl-trade-sub{font-size:9px;color:#6B6560;margin-top:1px;}
+  .sl-count-ctrl{display:flex;align-items:center;gap:6px;}
+  .sl-count-btn{width:26px;height:26px;border-radius:50%;border:1px solid #E2DDD6;background:#F5F2EC;color:#1A1714;font-size:14px;display:grid;place-items:center;cursor:pointer;transition:all 0.15s;flex-shrink:0;}
+  .sl-count-btn:hover{background:#2A7A4F;color:#fff;border-color:#2A7A4F;}
+  .sl-count-val{width:32px;text-align:center;font-size:14px;font-weight:500;color:#1A1714;}
+  .sl-trade-card.has-workers{border-left:3px solid #2A7A4F;background:#EBF5EF;}
+  .sl-trade-card.has-workers .sl-trade-name{color:#2A7A4F;}
+
+  /* Summary strip */
+  .sl-att-summary{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.5rem;}
+  .sl-sum-pill{background:#0a2540;color:#fff;border-radius:99px;padding:6px 14px;font-size:11px;display:flex;align-items:center;gap:6px;}
+  .sl-sum-pill span{font-weight:500;color:#ffc629;}
+
+  /* Section cards */
+  .sl-section-card{background:#FDFCF9;border:1px solid #E2DDD6;border-radius:8px;padding:1.1rem 1.25rem;margin-bottom:1rem;}
+  .sl-section-card h4{font-size:10px;letter-spacing:0.07em;text-transform:uppercase;color:#6B6560;margin-bottom:10px;padding-bottom:8px;border-bottom:1px dashed #E2DDD6;}
+
+  /* Work items */
+  .sl-work-list{display:flex;flex-direction:column;gap:6px;margin-bottom:8px;}
+  .sl-work-item{display:flex;gap:6px;align-items:center;}
+  .sl-work-item .sl-inp{flex:1;}
+  .sl-work-del{background:none;border:none;color:#A09A94;font-size:16px;padding:0 4px;cursor:pointer;}
+  .sl-work-del:hover{color:#8B2020;}
+  .sl-add-line{font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.06em;padding:5px 12px;border:1px dashed #E2DDD6;border-radius:5px;background:none;color:#6B6560;cursor:pointer;width:100%;}
+  .sl-add-line:hover{border-color:#2A7A4F;color:#2A7A4F;}
+
+  /* Materials table */
+  .sl-mat-row{display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:6px;align-items:center;margin-bottom:6px;}
+  .sl-mat-row .sl-inp{height:30px;font-size:11px;}
+  .sl-mat-hdr{display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:6px;margin-bottom:4px;}
+  .sl-mat-hdr span{font-size:9px;letter-spacing:0.06em;text-transform:uppercase;color:#6B6560;}
+
+  /* Visitor rows */
+  .sl-vis-row{display:grid;grid-template-columns:1fr 1fr 2fr auto;gap:6px;align-items:center;margin-bottom:6px;}
+  .sl-vis-row .sl-inp{height:30px;font-size:11px;}
+  .sl-vis-hdr{display:grid;grid-template-columns:1fr 1fr 2fr auto;gap:6px;margin-bottom:4px;}
+  .sl-vis-hdr span{font-size:9px;letter-spacing:0.06em;text-transform:uppercase;color:#6B6560;}
+
+  /* Weather pills */
+  .sl-weather-opts{display:flex;gap:6px;flex-wrap:wrap;}
+  .sl-weather-opt{padding:6px 14px;font-size:11px;border:1px solid #E2DDD6;border-radius:99px;background:#FDFCF9;color:#6B6560;cursor:pointer;transition:all 0.15s;}
+  .sl-weather-opt.active{background:#0a2540;color:#fff;border-color:#0a2540;}
+
+  /* Photo upload */
+  .sl-photo-area{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;}
+  .sl-photo-thumb{width:72px;height:72px;object-fit:cover;border-radius:6px;border:1px solid #E2DDD6;cursor:pointer;}
+  .sl-photo-upload-btn{width:72px;height:72px;border:1.5px dashed #E2DDD6;border-radius:6px;background:#F5F2EC;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;color:#6B6560;font-size:10px;gap:4px;transition:all 0.15s;}
+  .sl-photo-upload-btn:hover{border-color:#2A7A4F;color:#2A7A4F;}
+  .sl-photo-upload-btn svg{width:20px;height:20px;}
+  .sl-photo-input{display:none;}
+
+  /* Buttons */
+  .sl-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:1.5rem;}
+  .sl-btn{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;padding:9px 18px;border-radius:6px;cursor:pointer;border:1px solid;transition:all 0.2s;}
+  .sl-btn-primary{background:#2A7A4F;color:#fff;border-color:#2A7A4F;}
+  .sl-btn-primary:hover{background:#1f5e3b;}
+  .sl-btn-secondary{background:none;color:#6B6560;border-color:#E2DDD6;}
+  .sl-btn-secondary:hover{background:#E2DDD6;color:#1A1714;}
+  .sl-btn-export{background:#0a2540;color:#fff;border-color:#0a2540;}
+  .sl-btn-export:hover{background:#ffc629;color:#0a2540;border-color:#ffc629;}
+  .sl-btn-danger{background:none;color:#8B2020;border-color:#f4b0b0;}
+  .sl-btn-danger:hover{background:#8B2020;color:#fff;}
+
+  /* Log entries */
+  .sl-log-entry{background:#FDFCF9;border:1px solid #E2DDD6;border-radius:8px;margin-bottom:10px;overflow:hidden;}
+  .sl-log-entry-head{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;background:#FDFCF9;}
+  .sl-log-entry-head:hover{background:rgba(0,0,0,0.02);}
+  .sl-log-entry-date{font-size:13px;font-weight:500;color:#1A1714;}
+  .sl-log-entry-meta{font-size:10px;color:#6B6560;margin-top:2px;}
+  .sl-log-entry-pills{display:flex;gap:6px;flex-wrap:wrap;}
+  .sl-log-pill{padding:2px 8px;border-radius:99px;font-size:9px;font-weight:500;text-transform:uppercase;}
+  .sl-log-pill.green{background:#EBF5EF;color:#2A7A4F;}
+  .sl-log-pill.amber{background:#FEF4DC;color:#8B5E00;}
+  .sl-log-pill.red{background:#fdeaea;color:#8B2020;}
+  .sl-log-entry-body{padding:0 14px 12px;border-top:1px solid #E2DDD6;display:none;}
+  .sl-log-entry-body.open{display:block;padding-top:12px;}
+  .sl-log-section{margin-bottom:10px;}
+  .sl-log-section h5{font-size:9px;letter-spacing:0.07em;text-transform:uppercase;color:#6B6560;margin-bottom:6px;}
+  .sl-log-att-chips{display:flex;gap:6px;flex-wrap:wrap;}
+  .sl-log-att-chip{padding:3px 10px;background:#0a2540;color:#fff;border-radius:99px;font-size:10px;}
+  .sl-log-att-chip span{color:#ffc629;margin-left:3px;}
+  .sl-log-photos{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;}
+  .sl-log-photo{width:64px;height:64px;object-fit:cover;border-radius:5px;border:1px solid #E2DDD6;cursor:pointer;}
+
+  /* Empty */
+  .sl-empty{text-align:center;padding:3rem 1rem;color:#A09A94;}
+  .sl-empty-icon{font-size:32px;margin-bottom:8px;}
+
+  /* Lightbox */
+  .sl-lightbox{position:fixed;inset:0;z-index:1100;background:rgba(0,0,0,0.92);display:none;align-items:center;justify-content:center;cursor:pointer;}
+  .sl-lightbox.open{display:flex;}
+  .sl-lightbox img{max-width:90vw;max-height:90vh;border-radius:8px;object-fit:contain;}
+
+  @media(max-width:520px){
+    .sl-att-grid{grid-template-columns:1fr 1fr;}
+    .sl-mat-row,.sl-vis-row{grid-template-columns:1fr 1fr auto;}
+    .sitelog-fab{bottom:272px;right:16px;padding:11px 16px;font-size:11px;}
+    .sitelog-modal__panel{max-width:100%;}
+  }
+</style>
+
+<div class="sl-app">
+
+  <div class="sl-tabs">
+    <button class="sl-tab active" id="sl-tab1" onclick="slGoTab(1)">① New Entry</button>
+    <button class="sl-tab" id="sl-tab2" onclick="slGoTab(2)">② Log History</button>
+  </div>
+
+  <!-- ══ TAB 1: NEW ENTRY ══ -->
+  <div class="sl-panel active" id="sl-panel1">
+
+    <!-- Project + Date -->
+    <div class="sl-meta-row">
+      <div class="sl-fg" style="flex:2;min-width:180px">
+        <label>Project name</label>
+        <input class="sl-inp" id="sl-project" type="text" placeholder="e.g. Sharma Residence, Sec 27" />
+      </div>
+      <div class="sl-fg" style="flex:1;min-width:130px">
+        <label>Date</label>
+        <input class="sl-inp" id="sl-date" type="date" />
+      </div>
+      <div class="sl-fg" style="flex:1;min-width:130px">
+        <label>Submitted by</label>
+        <input class="sl-inp" id="sl-by" type="text" placeholder="Supervisor name" />
+      </div>
+    </div>
+
+    <!-- Attendance -->
+    <div class="sl-sec"><strong>Attendance</strong> — workers present today</div>
+    <div class="sl-att-grid" id="sl-att-grid">
+      <!-- generated by JS -->
+    </div>
+    <div class="sl-att-summary" id="sl-att-summary"></div>
+
+    <!-- Work completed -->
+    <div class="sl-section-card">
+      <h4>Work completed today</h4>
+      <div class="sl-work-list" id="sl-work-list"></div>
+      <button class="sl-add-line" onclick="slAddWorkLine()">＋ Add work item</button>
+    </div>
+
+    <!-- Materials received -->
+    <div class="sl-section-card">
+      <h4>Materials received on site</h4>
+      <div class="sl-mat-hdr"><span>Material</span><span>Quantity</span><span>Unit</span><span></span></div>
+      <div id="sl-mat-list"></div>
+      <button class="sl-add-line" onclick="slAddMatRow()">＋ Add material</button>
+    </div>
+
+    <!-- Equipment -->
+    <div class="sl-section-card">
+      <h4>Equipment on site</h4>
+      <div class="sl-work-list" id="sl-equip-list"></div>
+      <button class="sl-add-line" onclick="slAddEquipLine()">＋ Add equipment</button>
+    </div>
+
+    <!-- Weather -->
+    <div class="sl-section-card">
+      <h4>Weather &amp; site conditions</h4>
+      <div class="sl-weather-opts" id="sl-weather-opts">
+        <button class="sl-weather-opt" onclick="slToggleWeather(this)">☀️ Clear</button>
+        <button class="sl-weather-opt" onclick="slToggleWeather(this)">⛅ Partly cloudy</button>
+        <button class="sl-weather-opt" onclick="slToggleWeather(this)">🌧 Rain</button>
+        <button class="sl-weather-opt" onclick="slToggleWeather(this)">🌩 Storm</button>
+        <button class="sl-weather-opt" onclick="slToggleWeather(this)">🌫 Dusty / Hazy</button>
+        <button class="sl-weather-opt" onclick="slToggleWeather(this)">🥵 Very hot</button>
+      </div>
+      <div class="sl-fg" style="margin-top:10px">
+        <label>Site conditions / remarks</label>
+        <textarea class="sl-inp" id="sl-weather-note" placeholder="e.g. waterlogging near east boundary, concrete curing delayed..."></textarea>
+      </div>
+    </div>
+
+    <!-- Blockers -->
+    <div class="sl-section-card">
+      <h4>Blockers &amp; issues</h4>
+      <div class="sl-work-list" id="sl-blocker-list"></div>
+      <button class="sl-add-line" onclick="slAddBlockerLine()">＋ Add blocker</button>
+    </div>
+
+    <!-- Visitor log -->
+    <div class="sl-section-card">
+      <h4>Visitor log</h4>
+      <div class="sl-vis-hdr"><span>Name</span><span>Role</span><span>Purpose / Remarks</span><span></span></div>
+      <div id="sl-vis-list"></div>
+      <button class="sl-add-line" onclick="slAddVisRow()">＋ Add visitor</button>
+    </div>
+
+    <!-- Photos -->
+    <div class="sl-section-card">
+      <h4>Site photos</h4>
+      <div class="sl-photo-area" id="sl-photo-area">
+        <label class="sl-photo-upload-btn">
+          <input type="file" class="sl-photo-input" id="sl-photo-input" accept="image/*" multiple onchange="slAddPhotos(this)" />
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="currentColor"><path d="M149.1 64.8L138.7 96H64C28.7 96 0 124.7 0 160V416c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V160c0-35.3-28.7-64-64-64H373.3L362.9 64.8C356.4 45.2 338.1 32 317.4 32H194.6c-20.7 0-39 13.2-45.5 32.8zM256 192a96 96 0 1 1 0 192 96 96 0 1 1 0-192z"/></svg>
+          Add photo
+        </label>
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="sl-section-card">
+      <h4>General notes / instructions for tomorrow</h4>
+      <textarea class="sl-inp" id="sl-notes" placeholder="Any additional notes, instructions for the next shift..."></textarea>
+    </div>
+
+    <div class="sl-actions">
+      <button class="sl-btn sl-btn-primary" onclick="slSaveEntry()">Save Entry</button>
+      <button class="sl-btn sl-btn-secondary" onclick="slClearForm()">Clear Form</button>
+    </div>
+
+  </div>
+
+  <!-- ══ TAB 2: LOG HISTORY ══ -->
+  <div class="sl-panel" id="sl-panel2">
+
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:1.25rem;">
+      <div class="sl-sec" style="margin-bottom:0"><strong>Log History</strong> — all saved entries</div>
+      <div style="display:flex;gap:8px;">
+        <button class="sl-btn sl-btn-export" onclick="slExportReport()">⬇ Export Report</button>
+        <button class="sl-btn sl-btn-danger" onclick="slClearAll()">Clear All</button>
+      </div>
+    </div>
+
+    <!-- Filter by project -->
+    <div class="sl-fg" style="margin-bottom:1.25rem;max-width:300px">
+      <label>Filter by project</label>
+      <select class="sl-inp" id="sl-filter-project" onchange="slRenderLog()">
+        <option value="">All projects</option>
+      </select>
+    </div>
+
+    <div id="sl-log-list"></div>
+
+  </div>
+
+</div><!-- .sl-app -->
+
+<!-- Lightbox -->
+<div class="sl-lightbox" id="sl-lightbox" onclick="this.classList.remove('open')">
+  <img id="sl-lightbox-img" src="" alt="Site photo" />
+</div>
+
+<script>
+(function(){
+  var SL_ENTRIES = [];
+  var SL_PHOTOS  = []; // base64 array for current form
+  var SL_WORK_ID = 0, SL_MAT_ID = 0, SL_EQUIP_ID = 0, SL_BLOCKER_ID = 0, SL_VIS_ID = 0;
+
+  var TRADES = [
+    {id:'mason',     name:'Mason / Mistri',        icon:'🧱'},
+    {id:'carpenter', name:'Carpenter',              icon:'🪚'},
+    {id:'electrician',name:'Electrician',           icon:'⚡'},
+    {id:'plumber',   name:'Plumber',                icon:'🔧'},
+    {id:'painter',   name:'Painter',                icon:'🖌'},
+    {id:'steel',     name:'Steel Fixer / Bar Bender',icon:'⚙️'},
+    {id:'tile',      name:'Tile Layer',             icon:'🔳'},
+    {id:'helper',    name:'Helper / Labour',        icon:'👷'},
+    {id:'hvac',      name:'HVAC Technician',        icon:'❄️'},
+    {id:'supervisor',name:'Supervisor',             icon:'📋'},
+  ];
+
+  var SL_COUNTS = {};
+  TRADES.forEach(function(t){ SL_COUNTS[t.id] = 0; });
+
+  // ── Init ──
+  function slInit(){
+    // Set today's date
+    var today = new Date().toISOString().split('T')[0];
+    document.getElementById('sl-date').value = today;
+    slBuildAttGrid();
+    slAddWorkLine();
+    slAddMatRow();
+    slAddEquipLine();
+    slRenderAttSummary();
+    slRenderLog();
+  }
+
+  function slBuildAttGrid(){
+    var grid = document.getElementById('sl-att-grid');
+    grid.innerHTML = '';
+    TRADES.forEach(function(t){
+      var card = document.createElement('div');
+      card.className = 'sl-trade-card';
+      card.id = 'sl-trade-'+t.id;
+      card.innerHTML =
+        '<div><div class="sl-trade-name">'+t.icon+' '+t.name+'</div></div>'+
+        '<div class="sl-count-ctrl">'+
+        '<button class="sl-count-btn" onclick="slAdjCount(\''+t.id+'\',-1)">−</button>'+
+        '<div class="sl-count-val" id="slc-'+t.id+'">0</div>'+
+        '<button class="sl-count-btn" onclick="slAdjCount(\''+t.id+'\',1)">+</button>'+
+        '</div>';
+      grid.appendChild(card);
+    });
+  }
+
+  window.slGoTab = function(n){
+    [1,2].forEach(function(i){
+      document.getElementById('sl-panel'+i).classList.toggle('active',i===n);
+      document.getElementById('sl-tab'+i).classList.toggle('active',i===n);
+    });
+    if(n===2) slRenderLog();
+  };
+
+  window.slAdjCount = function(id, delta){
+    SL_COUNTS[id] = Math.max(0, (SL_COUNTS[id]||0) + delta);
+    document.getElementById('slc-'+id).textContent = SL_COUNTS[id];
+    var card = document.getElementById('sl-trade-'+id);
+    card.classList.toggle('has-workers', SL_COUNTS[id] > 0);
+    slRenderAttSummary();
+  };
+
+  function slRenderAttSummary(){
+    var total = 0;
+    var present = [];
+    TRADES.forEach(function(t){
+      if(SL_COUNTS[t.id] > 0){ total += SL_COUNTS[t.id]; present.push(t.icon+' '+SL_COUNTS[t.id]); }
+    });
+    var s = document.getElementById('sl-att-summary');
+    s.innerHTML = total > 0
+      ? '<div class="sl-sum-pill">Total on site: <span>'+total+'</span></div>'+
+        present.map(function(p){ return '<div class="sl-sum-pill" style="background:#E2DDD6;color:#1A1714"><span style="color:#2A7A4F">'+p+'</span></div>'; }).join('')
+      : '';
+  }
+
+  // ── Dynamic list builders ──
+  window.slAddWorkLine = function(){
+    var id = SL_WORK_ID++;
+    var row = document.createElement('div'); row.className='sl-work-item'; row.id='sl-wl-'+id;
+    row.innerHTML='<input class="sl-inp" type="text" placeholder="e.g. RCC column casting on 2nd floor completed" /><button class="sl-work-del" onclick="document.getElementById(\'sl-wl-'+id+'\').remove()">×</button>';
+    document.getElementById('sl-work-list').appendChild(row);
+  };
+
+  window.slAddEquipLine = function(){
+    var id = SL_EQUIP_ID++;
+    var row = document.createElement('div'); row.className='sl-work-item'; row.id='sl-eq-'+id;
+    row.innerHTML='<input class="sl-inp" type="text" placeholder="e.g. Concrete mixer, Scaffolding (3 sets)" /><button class="sl-work-del" onclick="document.getElementById(\'sl-eq-'+id+'\').remove()">×</button>';
+    document.getElementById('sl-equip-list').appendChild(row);
+  };
+
+  window.slAddBlockerLine = function(){
+    var id = SL_BLOCKER_ID++;
+    var row = document.createElement('div'); row.className='sl-work-item'; row.id='sl-bl-'+id;
+    row.innerHTML='<input class="sl-inp" type="text" placeholder="e.g. Brick delivery delayed — contractor not responding" /><button class="sl-work-del" onclick="document.getElementById(\'sl-bl-'+id+'\').remove()">×</button>';
+    document.getElementById('sl-blocker-list').appendChild(row);
+  };
+
+  window.slAddMatRow = function(){
+    var id = SL_MAT_ID++;
+    var row = document.createElement('div'); row.className='sl-mat-row'; row.id='sl-mr-'+id;
+    row.innerHTML=
+      '<input class="sl-inp" type="text" placeholder="e.g. OPC Cement" />'+
+      '<input class="sl-inp" type="number" placeholder="50" min="0" />'+
+      '<input class="sl-inp" type="text" placeholder="bags / sqft / kg" />'+
+      '<button class="sl-work-del" onclick="document.getElementById(\'sl-mr-'+id+'\').remove()">×</button>';
+    document.getElementById('sl-mat-list').appendChild(row);
+  };
+
+  window.slAddVisRow = function(){
+    var id = SL_VIS_ID++;
+    var row = document.createElement('div'); row.className='sl-vis-row'; row.id='sl-vr-'+id;
+    row.innerHTML=
+      '<input class="sl-inp" type="text" placeholder="Name" />'+
+      '<input class="sl-inp" type="text" placeholder="Client / Engineer" />'+
+      '<input class="sl-inp" type="text" placeholder="Purpose of visit" />'+
+      '<button class="sl-work-del" onclick="document.getElementById(\'sl-vr-'+id+'\').remove()">×</button>';
+    document.getElementById('sl-vis-list').appendChild(row);
+  };
+
+  window.slToggleWeather = function(el){
+    el.classList.toggle('active');
+  };
+
+  // ── Photos ──
+  window.slAddPhotos = function(input){
+    if(!input.files) return;
+    Array.from(input.files).forEach(function(file){
+      var reader = new FileReader();
+      reader.onload = function(e){
+        SL_PHOTOS.push(e.target.result);
+        slRenderPhotoArea();
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  function slRenderPhotoArea(){
+    var area = document.getElementById('sl-photo-area');
+    // Keep upload button
+    var uploadBtn = area.querySelector('label');
+    area.innerHTML = '';
+    SL_PHOTOS.forEach(function(src, i){
+      var img = document.createElement('img');
+      img.className = 'sl-photo-thumb';
+      img.src = src;
+      img.onclick = function(){ slOpenLightbox(src); };
+      area.appendChild(img);
+    });
+    area.appendChild(uploadBtn);
+  }
+
+  window.slOpenLightbox = function(src){
+    document.getElementById('sl-lightbox-img').src = src;
+    document.getElementById('sl-lightbox').classList.add('open');
+  };
+
+  // ── Collect form data ──
+  function slCollectForm(){
+    var attendance = {};
+    TRADES.forEach(function(t){ if(SL_COUNTS[t.id]>0) attendance[t.id]=SL_COUNTS[t.id]; });
+
+    var work = Array.from(document.querySelectorAll('#sl-work-list input')).map(function(i){return i.value.trim();}).filter(Boolean);
+    var equip = Array.from(document.querySelectorAll('#sl-equip-list input')).map(function(i){return i.value.trim();}).filter(Boolean);
+    var blockers = Array.from(document.querySelectorAll('#sl-blocker-list input')).map(function(i){return i.value.trim();}).filter(Boolean);
+
+    var materials = [];
+    document.querySelectorAll('.sl-mat-row').forEach(function(row){
+      var inputs = row.querySelectorAll('input');
+      if(inputs[0] && inputs[0].value.trim()){
+        materials.push({name:inputs[0].value.trim(), qty:inputs[1]?inputs[1].value:'', unit:inputs[2]?inputs[2].value.trim():''});
+      }
+    });
+
+    var visitors = [];
+    document.querySelectorAll('.sl-vis-row').forEach(function(row){
+      var inputs = row.querySelectorAll('input');
+      if(inputs[0] && inputs[0].value.trim()){
+        visitors.push({name:inputs[0].value.trim(), role:inputs[1]?inputs[1].value.trim():'', purpose:inputs[2]?inputs[2].value.trim():''});
+      }
+    });
+
+    var weather = Array.from(document.querySelectorAll('.sl-weather-opt.active')).map(function(b){return b.textContent.trim();});
+
+    return {
+      project:  document.getElementById('sl-project').value.trim() || 'Unnamed Project',
+      date:     document.getElementById('sl-date').value || new Date().toISOString().split('T')[0],
+      by:       document.getElementById('sl-by').value.trim() || '—',
+      attendance, work, equip, blockers, materials, visitors, weather,
+      weatherNote: document.getElementById('sl-weather-note').value.trim(),
+      notes:    document.getElementById('sl-notes').value.trim(),
+      photos:   [...SL_PHOTOS],
+      savedAt:  new Date().toISOString(),
+    };
+  }
+
+  window.slSaveEntry = function(){
+    var entry = slCollectForm();
+    var totalWorkers = Object.values(entry.attendance).reduce(function(a,b){return a+b;},0);
+    if(!entry.project && totalWorkers===0 && entry.work.length===0){
+      alert('Please fill in at least the project name and some details.'); return;
+    }
+    SL_ENTRIES.unshift(entry);
+    slClearForm();
+    slGoTab(2);
+  };
+
+  window.slClearForm = function(){
+    document.getElementById('sl-project').value='';
+    document.getElementById('sl-date').value=new Date().toISOString().split('T')[0];
+    document.getElementById('sl-by').value='';
+    TRADES.forEach(function(t){
+      SL_COUNTS[t.id]=0;
+      var el=document.getElementById('slc-'+t.id); if(el) el.textContent='0';
+      var card=document.getElementById('sl-trade-'+t.id); if(card) card.classList.remove('has-workers');
+    });
+    slRenderAttSummary();
+    ['sl-work-list','sl-equip-list','sl-blocker-list'].forEach(function(id){document.getElementById(id).innerHTML='';});
+    document.getElementById('sl-mat-list').innerHTML='';
+    document.getElementById('sl-vis-list').innerHTML='';
+    document.querySelectorAll('.sl-weather-opt').forEach(function(b){b.classList.remove('active');});
+    document.getElementById('sl-weather-note').value='';
+    document.getElementById('sl-notes').value='';
+    SL_PHOTOS=[];
+    var area=document.getElementById('sl-photo-area');
+    var btn=area.querySelector('label'); area.innerHTML=''; area.appendChild(btn);
+    slAddWorkLine(); slAddMatRow(); slAddEquipLine();
+  };
+
+  // ── Log rendering ──
+  function slRenderLog(){
+    // Update project filter
+    var filter = document.getElementById('sl-filter-project');
+    var current = filter.value;
+    var projects = [...new Set(SL_ENTRIES.map(function(e){return e.project;}))];
+    filter.innerHTML = '<option value="">All projects</option>' +
+      projects.map(function(p){return '<option value="'+p+'" '+(p===current?'selected':'')+'>'+p+'</option>';}).join('');
+
+    var filtered = current ? SL_ENTRIES.filter(function(e){return e.project===current;}) : SL_ENTRIES;
+    var list = document.getElementById('sl-log-list');
+
+    if(filtered.length===0){
+      list.innerHTML='<div class="sl-empty"><div class="sl-empty-icon">📋</div><p>No entries yet. Fill in the New Entry tab to get started.</p></div>';
+      return;
+    }
+
+    list.innerHTML='';
+    filtered.forEach(function(entry, idx){
+      var totalWorkers = Object.values(entry.attendance).reduce(function(a,b){return a+b;},0);
+      var dateStr = entry.date ? new Date(entry.date+'T00:00:00').toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short',year:'numeric'}) : '—';
+
+      // Attendance chips
+      var attChips = Object.keys(entry.attendance).map(function(tid){
+        var trade = TRADES.find(function(t){return t.id===tid;});
+        return '<div class="sl-log-att-chip">'+(trade?trade.icon+' '+trade.name:'?')+'<span>'+entry.attendance[tid]+'</span></div>';
+      }).join('');
+
+      // Work items
+      var workHtml = entry.work.length ? '<ul style="padding-left:1rem;font-size:11px;color:#1A1714;line-height:1.8">'+entry.work.map(function(w){return '<li>'+w+'</li>';}).join('')+'</ul>' : '<p style="font-size:11px;color:#A09A94">—</p>';
+
+      // Materials
+      var matHtml = entry.materials.length
+        ? '<table style="width:100%;font-size:11px;border-collapse:collapse">'+
+          entry.materials.map(function(m){return '<tr><td style="padding:3px 6px 3px 0;color:#1A1714">'+m.name+'</td><td style="padding:3px 6px;color:#6B6560">'+m.qty+' '+m.unit+'</td></tr>';}).join('')+
+          '</table>'
+        : '<p style="font-size:11px;color:#A09A94">—</p>';
+
+      // Visitors
+      var visHtml = entry.visitors.length
+        ? '<table style="width:100%;font-size:11px;border-collapse:collapse">'+
+          entry.visitors.map(function(v){return '<tr><td style="padding:3px 6px 3px 0;font-weight:500;color:#1A1714">'+v.name+'</td><td style="color:#6B6560;padding:3px 6px">'+v.role+'</td><td style="color:#6B6560;padding:3px 0">'+v.purpose+'</td></tr>';}).join('')+
+          '</table>'
+        : '<p style="font-size:11px;color:#A09A94">None</p>';
+
+      // Blockers
+      var blockHtml = entry.blockers.length
+        ? '<ul style="padding-left:1rem;font-size:11px;color:#8B2020;line-height:1.8">'+entry.blockers.map(function(b){return '<li>'+b+'</li>';}).join('')+'</ul>'
+        : '<p style="font-size:11px;color:#A09A94">None</p>';
+
+      // Photos
+      var photoHtml = entry.photos && entry.photos.length
+        ? '<div class="sl-log-photos">'+entry.photos.map(function(src){return '<img class="sl-log-photo" src="'+src+'" onclick="slOpenLightbox(\''+src+'\')" />';}).join('')+'</div>'
+        : '<p style="font-size:11px;color:#A09A94">None</p>';
+
+      var div = document.createElement('div');
+      div.className = 'sl-log-entry';
+      div.innerHTML =
+        '<div class="sl-log-entry-head" onclick="slToggleEntry(this)">'+
+          '<div>'+
+            '<div class="sl-log-entry-date">'+dateStr+' &nbsp;·&nbsp; '+entry.project+'</div>'+
+            '<div class="sl-log-entry-meta">by '+entry.by+' &nbsp;·&nbsp; '+totalWorkers+' workers &nbsp;·&nbsp; '+(entry.work.length)+' work items &nbsp;·&nbsp; '+(entry.blockers.length ? '<span style="color:#8B2020">'+entry.blockers.length+' blocker(s)</span>' : 'no blockers')+'</div>'+
+          '</div>'+
+          '<div class="sl-log-entry-pills">'+
+            (totalWorkers>0?'<span class="sl-log-pill green">'+totalWorkers+' on site</span>':'')+
+            (entry.blockers.length?'<span class="sl-log-pill red">'+entry.blockers.length+' blocker</span>':'')+
+            (entry.weather.length?'<span class="sl-log-pill amber">'+entry.weather[0]+'</span>':'')+
+          '</div>'+
+        '</div>'+
+        '<div class="sl-log-entry-body">'+
+          '<div class="sl-log-section"><h5>Attendance ('+totalWorkers+' total)</h5><div class="sl-log-att-chips">'+attChips+'</div></div>'+
+          '<div class="sl-log-section"><h5>Work completed</h5>'+workHtml+'</div>'+
+          '<div class="sl-log-section"><h5>Materials received</h5>'+matHtml+'</div>'+
+          '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'+
+            '<div class="sl-log-section"><h5>Equipment on site</h5>'+(entry.equip&&entry.equip.length?'<ul style="padding-left:1rem;font-size:11px;line-height:1.8">'+entry.equip.map(function(e){return '<li>'+e+'</li>';}).join('')+'</ul>':'<p style="font-size:11px;color:#A09A94">—</p>')+'</div>'+
+            '<div class="sl-log-section"><h5>Visitors</h5>'+visHtml+'</div>'+
+          '</div>'+
+          '<div class="sl-log-section"><h5>Blockers</h5>'+blockHtml+'</div>'+
+          (entry.weather.length||entry.weatherNote?'<div class="sl-log-section"><h5>Weather</h5><p style="font-size:11px;color:#1A1714">'+entry.weather.join(', ')+(entry.weatherNote?' — '+entry.weatherNote:'')+'</p></div>':'')+
+          (entry.notes?'<div class="sl-log-section"><h5>Notes / tomorrow</h5><p style="font-size:11px;color:#1A1714">'+entry.notes+'</p></div>':'')+
+          '<div class="sl-log-section"><h5>Photos</h5>'+photoHtml+'</div>'+
+        '</div>';
+      list.appendChild(div);
+    });
+  }
+
+  window.slToggleEntry = function(head){
+    var body = head.nextElementSibling;
+    body.classList.toggle('open');
+  };
+
+  window.slClearAll = function(){
+    if(confirm('Delete all log entries? This cannot be undone.')){ SL_ENTRIES=[]; slRenderLog(); }
+  };
+
+  // ── Export ──
+  window.slExportReport = function(){
+    var filter = document.getElementById('sl-filter-project').value;
+    var entries = filter ? SL_ENTRIES.filter(function(e){return e.project===filter;}) : SL_ENTRIES;
+    if(!entries.length){ alert('No entries to export.'); return; }
+
+    var projectTitle = filter || 'All Projects';
+    var ts = new Date().toLocaleString('en-IN',{dateStyle:'long',timeStyle:'short'});
+    var totalDays = entries.length;
+    var totalWorkerDays = entries.reduce(function(s,e){ return s+Object.values(e.attendance).reduce(function(a,b){return a+b;},0); },0);
+    var totalBlockers = entries.reduce(function(s,e){return s+e.blockers.length;},0);
+
+    var entryRows = entries.map(function(entry){
+      var totalW = Object.values(entry.attendance).reduce(function(a,b){return a+b;},0);
+      var dateStr = entry.date ? new Date(entry.date+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : '—';
+      var attStr = Object.keys(entry.attendance).map(function(tid){
+        var t=TRADES.find(function(x){return x.id===tid;});
+        return (t?t.name:'?')+': '+entry.attendance[tid];
+      }).join(', ');
+      return '<tr>'+
+        '<td>'+dateStr+'</td>'+
+        '<td>'+totalW+'</td>'+
+        '<td style="font-size:10px">'+attStr+'</td>'+
+        '<td><ul style="padding-left:1rem;margin:0">'+entry.work.map(function(w){return '<li>'+w+'</li>';}).join('')+'</ul></td>'+
+        '<td style="color:'+(entry.blockers.length?'#8B2020':'#2A7A4F')+'">'+
+          (entry.blockers.length ? entry.blockers.join('; ') : '—')+'</td>'+
+        '<td>'+entry.by+'</td>'+
+      '</tr>';
+    }).join('');
+
+    var html = '<!DOCTYPE html><html><head><meta charset="UTF-8">'+
+      '<title>Site Log — '+projectTitle+'</title>'+
+      '<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Fraunces:ital,wght@0,300;0,600&display=swap" rel="stylesheet">'+
+      '<style>*{box-sizing:border-box;margin:0;padding:0}body{background:#f6f7f9;font-family:"JetBrains Mono",monospace;padding:2rem;color:#0a2540}'+
+      '.w{max-width:1000px;margin:0 auto}'+
+      '.hero{background:#2A7A4F;color:#fff;border-radius:8px;padding:1.5rem;margin-bottom:1.25rem}'+
+      '.hero h1{font-family:"Fraunces",serif;font-size:1.3rem;font-weight:300;font-style:italic;margin-bottom:4px}'+
+      '.hero .sub{font-size:11px;color:rgba(255,255,255,.5)}'+
+      '.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1.25rem}'+
+      '.stat{background:#fff;border:1px solid #E2DDD6;border-radius:6px;padding:.75rem 1rem}'+
+      '.stat .n{font-size:1.4rem;font-weight:500;color:#2A7A4F;margin-bottom:2px}.stat .l{font-size:9px;color:#6B6560;text-transform:uppercase;letter-spacing:.07em}'+
+      'h2{font-family:"Fraunces",serif;font-size:.95rem;font-weight:600;margin:1rem 0 .5rem}'+
+      'table{width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden;border:1px solid #E2DDD6;font-size:11px}'+
+      'th{text-align:left;padding:8px 10px;font-size:9px;letter-spacing:.07em;text-transform:uppercase;color:#6B6560;background:#f6f7f9;border-bottom:1px solid #E2DDD6}'+
+      'td{padding:8px 10px;border-bottom:1px solid #E2DDD6;vertical-align:top}tr:last-child td{border-bottom:none}'+
+      'tr:nth-child(even){background:#fafaf8}'+
+      '.footer{margin-top:1.5rem;font-size:10px;color:#A09A94;display:flex;justify-content:space-between;border-top:1px solid #E2DDD6;padding-top:1rem}'+
+      '</style></head><body><div class="w">'+
+      '<div class="hero"><h1>Site Log — '+projectTitle+'</h1>'+
+      '<div class="sub">Report generated: '+ts+'</div></div>'+
+      '<div class="stats">'+
+      '<div class="stat"><div class="n">'+totalDays+'</div><div class="l">Days logged</div></div>'+
+      '<div class="stat"><div class="n">'+totalWorkerDays+'</div><div class="l">Total worker-days</div></div>'+
+      '<div class="stat"><div class="n" style="color:'+(totalBlockers?'#8B2020':'#2A7A4F')+'">'+totalBlockers+'</div><div class="l">Total blockers</div></div>'+
+      '</div>'+
+      '<h2>Daily Entries</h2>'+
+      '<table><thead><tr><th>Date</th><th>Workers</th><th>Attendance breakdown</th><th>Work completed</th><th>Blockers</th><th>By</th></tr></thead>'+
+      '<tbody>'+entryRows+'</tbody></table>'+
+      '<div class="footer"><span>Modern Structures · Noida · +91 98188 18865</span><span>'+ts+'</span></div>'+
+      '</div></body></html>';
+
+    var blob = new Blob([html],{type:'text/html'});
+    var url  = URL.createObjectURL(blob);
+    var a    = document.createElement('a');
+    a.href=url; a.download='site-log-'+projectTitle.replace(/\s+/g,'-').toLowerCase()+'.html';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+  };
+
+  slInit();
+})();
+</script>
+<!-- ═══════════ SITE LOG APP ENDS HERE ═══════════ -->
+
+    </div>
+  </div>
+</div>
+
+<script>
+  (function(){
+    var btn   = document.getElementById('sitelogFloatBtn');
+    var modal = document.getElementById('sitelogModal');
+    var close = document.getElementById('sitelogModalClose');
+    if(!btn||!modal) return;
+    btn.addEventListener('click',function(){ modal.classList.add('is-open'); document.body.style.overflow='hidden'; });
+    close.addEventListener('click',function(){ modal.classList.remove('is-open'); document.body.style.overflow=''; });
+    modal.addEventListener('click',function(e){ if(e.target===modal){ modal.classList.remove('is-open'); document.body.style.overflow=''; } });
+    document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&modal.classList.contains('is-open')){ modal.classList.remove('is-open'); document.body.style.overflow=''; } });
+  })();
+</script>
+</body>
+</html>
